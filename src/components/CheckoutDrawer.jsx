@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink } from 'lucide-react'
+import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download } from 'lucide-react'
 import { API } from '../config/api'
 import { PayPalButtons } from "@paypal/react-paypal-js"
 import logoLady from '../assets/logo-lady.png'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
+  const receiptRef = useRef(null)
   const [activeImg, setActiveImg] = useState(0)
   const [step, setStep] = useState(1) // 1: Info, 2: Personal, 3: Stay, 4: Payment, 5: Success
   const [formData, setFormData] = useState({
@@ -93,6 +96,33 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
       alert('An error occurred while confirming your booking.')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const [isDownloading, setIsDownloading] = useState(false)
+  const handleDownloadReceipt = async () => {
+    if (!receiptRef.current) return
+    setIsDownloading(true)
+    try {
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width / 2, canvas.height / 2]
+      })
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2)
+      pdf.save(`FantasyIsland-Receipt-${bookingResult?._id || 'booking'}.pdf`)
+    } catch (err) {
+      console.error('PDF Generation Error:', err)
+      alert('Failed to generate PDF. Please try printing instead.')
+    } finally {
+      setIsDownloading(false)
     }
   }
 
@@ -495,7 +525,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                   </div>
 
                   {/* Receipt Card */}
-                  <div className="bg-white text-obsidian p-8 rounded-3xl relative overflow-hidden shadow-2xl">
+                  <div ref={receiptRef} className="bg-white text-obsidian p-8 rounded-3xl relative overflow-hidden shadow-2xl">
                     {/* Decorative Cutouts */}
                     <div className="absolute top-1/2 -left-3 w-6 h-6 bg-obsidian rounded-full -translate-y-1/2" />
                     <div className="absolute top-1/2 -right-3 w-6 h-6 bg-obsidian rounded-full -translate-y-1/2" />
@@ -538,11 +568,16 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
 
                   <div className="mt-10 space-y-4">
                     <button 
-                      onClick={() => window.print()}
-                      className="w-full py-4 rounded-2xl bg-obsidian border border-white/10 text-white font-bold uppercase tracking-widest hover:bg-white/5 transition-all flex items-center justify-center space-x-2"
+                      onClick={handleDownloadReceipt}
+                      disabled={isDownloading}
+                      className="w-full py-4 rounded-2xl bg-obsidian border border-white/10 text-white font-bold uppercase tracking-widest hover:bg-white/5 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
                     >
-                      <CreditCard size={18} />
-                      <span>Download Receipt</span>
+                      {isDownloading ? (
+                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <Download size={18} />
+                      )}
+                      <span>{isDownloading ? 'Generating PDF...' : 'Download Receipt'}</span>
                     </button>
                     <button 
                       onClick={onClose}

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, Loader2, Plus, Edit3, Trash2, Home, DollarSign, Star, Shield, Flame, MoreVertical } from 'lucide-react'
 import SuiteModal from '../../components/admin/SuiteModal'
 import { API } from '../../config/api'
+import apiClient from '../../config/apiClient'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const IconMap = { Shield, Star, Flame }
@@ -16,19 +17,15 @@ const AdminSuites = () => {
   const { data: suites, isLoading, error } = useQuery({
     queryKey: ['suites'],
     queryFn: async () => {
-      const response = await fetch(API.suites)
-      const data = await response.json()
-      return data.data
+      const response = await apiClient.get(API.suites)
+      return response.data.data
     }
   })
 
   const createMutation = useMutation({
     mutationFn: async (newSuite) => {
-      const response = await fetch(API.suites, {
-        method: 'POST',
-        body: newSuite
-      })
-      return response.json()
+      const response = await apiClient.post(API.suites, newSuite)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['suites'])
@@ -39,11 +36,8 @@ const AdminSuites = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }) => {
-      const response = await fetch(`${API.suites}/${id}`, {
-        method: 'PATCH',
-        body: updates
-      })
-      return response.json()
+      const response = await apiClient.patch(`${API.suites}/${id}`, updates)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['suites'])
@@ -54,10 +48,8 @@ const AdminSuites = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const response = await fetch(`${API.suites}/${id}`, {
-        method: 'DELETE'
-      })
-      return response.json()
+      const response = await apiClient.delete(`${API.suites}/${id}`)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['suites'])

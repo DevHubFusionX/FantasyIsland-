@@ -5,6 +5,9 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import LandingPage from './pages/LandingPage'
 import RoomsPage from './pages/RoomsPage'
 import ManageBooking from './pages/ManageBooking'
+import AdminLogin from './pages/AdminLogin'
+import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
 
 // Lazy-load admin routes — guests never download admin code
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -35,19 +38,23 @@ function App() {
   return (
     <PayPalScriptProvider options={{ "client-id": "test" }}>
       <QueryClientProvider client={queryClient}>
-        <Router>
+        <AuthProvider>
+          <Router>
           <div className="min-h-screen bg-obsidian text-white font-sans selection:bg-sensual-red selection:text-white">
 
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/rooms" element={<RoomsPage />} />
               <Route path="/manage-booking" element={<ManageBooking />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
               
-              {/* Lazy-loaded Admin Routes */}
+              {/* Protected Admin Routes */}
               <Route path="/admin" element={
-                <Suspense fallback={<AdminFallback />}>
-                  <AdminLayout />
-                </Suspense>
+                <ProtectedRoute>
+                  <Suspense fallback={<AdminFallback />}>
+                    <AdminLayout />
+                  </Suspense>
+                </ProtectedRoute>
               }>
                 <Route index element={
                   <Suspense fallback={<AdminFallback />}><AdminHome /></Suspense>
@@ -65,6 +72,7 @@ function App() {
             </Routes>
           </div>
         </Router>
+        </AuthProvider>
       </QueryClientProvider>
     </PayPalScriptProvider>
   )

@@ -4,6 +4,7 @@ import { Search, Loader2, Plus, Download } from 'lucide-react'
 import BookingRow from '../../components/admin/BookingRow'
 import BookingModal from '../../components/admin/BookingModal'
 import { API } from '../../config/api'
+import apiClient from '../../config/apiClient'
 
 const AdminBookings = () => {
   const queryClient = useQueryClient()
@@ -14,20 +15,15 @@ const AdminBookings = () => {
   const { data: bookings, isLoading, error } = useQuery({
     queryKey: ['bookings'],
     queryFn: async () => {
-      const response = await fetch(API.bookings)
-      const data = await response.json()
-      return data.data
+      const response = await apiClient.get(API.bookings)
+      return response.data.data
     }
   })
 
   const createMutation = useMutation({
     mutationFn: async (newBooking) => {
-      const response = await fetch(API.bookings, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBooking)
-      })
-      return response.json()
+      const response = await apiClient.post(API.bookings, newBooking)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['bookings'])
@@ -38,12 +34,8 @@ const AdminBookings = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }) => {
-      const response = await fetch(`${API.bookings}/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      })
-      return response.json()
+      const response = await apiClient.patch(`${API.bookings}/${id}`, updates)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['bookings'])
@@ -54,10 +46,8 @@ const AdminBookings = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const response = await fetch(`${API.bookings}/${id}`, {
-        method: 'DELETE'
-      })
-      return response.json()
+      const response = await apiClient.delete(`${API.bookings}/${id}`)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['bookings'])

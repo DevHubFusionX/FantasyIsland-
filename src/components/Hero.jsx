@@ -23,16 +23,24 @@ const Hero = () => {
     'Royal Obsidian': { price: 1500, minDays: 3, maxDays: 30 }
   }
 
-  // Auto-adjust duration if room changes and current duration is invalid
-  useEffect(() => {
-    const config = roomConfig[formData.room]
+  const handleRoomChange = (e) => {
+    const newRoom = e.target.value
+    const config = roomConfig[newRoom]
     const currentDur = parseInt(formData.duration)
+    
+    let adjustedDuration = formData.duration
     if (currentDur < config.minDays) {
-      setFormData(prev => ({ ...prev, duration: config.minDays.toString() }))
+      adjustedDuration = config.minDays.toString()
     } else if (currentDur > config.maxDays) {
-      setFormData(prev => ({ ...prev, duration: config.maxDays.toString() }))
+      adjustedDuration = config.maxDays.toString()
     }
-  }, [formData.room])
+
+    setFormData(prev => ({
+      ...prev,
+      room: newRoom,
+      duration: adjustedDuration
+    }))
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -223,7 +231,7 @@ const Hero = () => {
                         <select 
                           className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 appearance-none"
                           value={formData.room}
-                          onChange={(e) => setFormData({...formData, room: e.target.value})}
+                          onChange={handleRoomChange}
                         >
                           <option value="The Velvet Lounge" className="bg-obsidian">Velvet Lounge</option>
                           <option value="Crimson VIP Suite" className="bg-obsidian">VIP Suite</option>

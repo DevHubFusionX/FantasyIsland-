@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Save, Loader2, CreditCard, Landmark, Bitcoin, ShieldCheck, RefreshCw } from 'lucide-react'
 import { API } from '../../config/api'
+import apiClient from '../../config/apiClient'
 
 const AdminSettings = () => {
   const queryClient = useQueryClient()
@@ -10,9 +11,8 @@ const AdminSettings = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const response = await fetch(API.settings)
-      const data = await response.json()
-      return data
+      const response = await apiClient.get(API.settings)
+      return response.data
     }
   })
 
@@ -24,12 +24,8 @@ const AdminSettings = () => {
 
   const mutation = useMutation({
     mutationFn: async (updatedSettings) => {
-      const response = await fetch(API.settings, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings: updatedSettings })
-      })
-      return response.json()
+      const response = await apiClient.post(API.settings, { settings: updatedSettings })
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['settings'])
