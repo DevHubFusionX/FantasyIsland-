@@ -212,14 +212,14 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               key={activeImg}
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              src={(room.images && room.images.length > 0) ? room.images[activeImg] : room.img} 
+                              src={(room.gallery && room.gallery.length > 0) ? room.gallery[activeImg] : room.img} 
                               alt={room.title} 
                               className="w-full h-40 md:h-48 object-cover rounded-2xl md:rounded-3xl border border-white/10" 
                             />
                             
-                            {room.images && room.images.length > 1 && (
+                            {room.gallery && room.gallery.length > 1 && (
                               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5 p-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
-                                {room.images.map((_, i) => (
+                                {room.gallery.map((_, i) => (
                                   <button
                                     key={i}
                                     onClick={() => setActiveImg(i)}

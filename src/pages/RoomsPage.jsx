@@ -8,9 +8,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import CheckoutDrawer from '../components/CheckoutDrawer'
 
-import regularRoom from '../assets/room-regular.png'
-import vipRoom from '../assets/room-vip.png'
-import royalRoom from '../assets/room-royal.png'
+import { API } from '../config/api'
 
 const RoomCard = React.memo(({ title, price, img, features, icon: Icon, delay, onReserve }) => (
   <motion.div
@@ -63,11 +61,7 @@ const iconMap = {
   Flame: Flame
 }
 
-const imageMap = {
-  "/src/assets/room-regular.png": regularRoom,
-  "/src/assets/room-vip.png": vipRoom,
-  "/src/assets/room-royal.png": royalRoom
-}
+
 
 const RoomsPage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -141,7 +135,7 @@ const RoomsPage = () => {
               <RoomCard 
                 key={room._id} 
                 {...room} 
-                img={imageMap[room.img] || room.img}
+                img={room.img}
                 icon={iconMap[room.icon] || Shield}
                 delay={index * 0.1}
                 onReserve={() => handleReserve(room)}
