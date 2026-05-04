@@ -1,25 +1,72 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import LandingPage from './pages/LandingPage'
 import RoomsPage from './pages/RoomsPage'
-import CustomCursor from './components/CustomCursor'
+import ManageBooking from './pages/ManageBooking'
 
-const queryClient = new QueryClient()
+// Lazy-load admin routes — guests never download admin code
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
+const AdminHome = lazy(() => import('./pages/admin/AdminHome'))
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'))
+const AdminSuites = lazy(() => import('./pages/admin/AdminSuites'))
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
+
+const AdminFallback = () => (
+  <div className="min-h-screen bg-obsidian flex flex-col items-center justify-center">
+    <div className="w-8 h-8 border-2 border-sensual-red border-t-transparent rounded-full animate-spin mb-4" />
+    <p className="text-white/20 uppercase tracking-[0.3em] text-[10px] font-bold">Loading Admin Panel...</p>
+  </div>
+)
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 minutes before refetch
+      gcTime: 1000 * 60 * 10,   // 10 minutes cache lifetime
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="min-h-screen bg-obsidian text-white font-sans selection:bg-sensual-red selection:text-white">
-          <CustomCursor />
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/rooms" element={<RoomsPage />} />
-          </Routes>
-        </div>
-      </Router>
-    </QueryClientProvider>
+    <PayPalScriptProvider options={{ "client-id": "test" }}>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <div className="min-h-screen bg-obsidian text-white font-sans selection:bg-sensual-red selection:text-white">
+
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/rooms" element={<RoomsPage />} />
+              <Route path="/manage-booking" element={<ManageBooking />} />
+              
+              {/* Lazy-loaded Admin Routes */}
+              <Route path="/admin" element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminLayout />
+                </Suspense>
+              }>
+                <Route index element={
+                  <Suspense fallback={<AdminFallback />}><AdminHome /></Suspense>
+                } />
+                <Route path="bookings" element={
+                  <Suspense fallback={<AdminFallback />}><AdminBookings /></Suspense>
+                } />
+                <Route path="suites" element={
+                  <Suspense fallback={<AdminFallback />}><AdminSuites /></Suspense>
+                } />
+                <Route path="settings" element={
+                  <Suspense fallback={<AdminFallback />}><AdminSettings /></Suspense>
+                } />
+              </Route>
+            </Routes>
+          </div>
+        </Router>
+      </QueryClientProvider>
+    </PayPalScriptProvider>
   )
 }
 

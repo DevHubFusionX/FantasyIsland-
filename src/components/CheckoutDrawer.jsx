@@ -1,26 +1,106 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, CheckCircle2 } from 'lucide-react'
+import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink } from 'lucide-react'
+import { API } from '../config/api'
+import { PayPalButtons } from "@paypal/react-paypal-js"
+import logoLady from '../assets/logo-lady.png'
 
-const CheckoutDrawer = ({ isOpen, onClose, room }) => {
-  const [step, setStep] = useState(1) // 1: Info, 2: Personal, 3: Stay, 4: Success
+const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
+  const [activeImg, setActiveImg] = useState(0)
+  const [step, setStep] = useState(1) // 1: Info, 2: Personal, 3: Stay, 4: Payment, 5: Success
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     date: '',
-    duration: '1'
+    duration: '1',
+    paymentMethod: 'Bank Transfer'
   })
 
-  if (!room && step !== 4) return null
+  // Handle pre-filled data from Hero
+  useEffect(() => {
+    if (prefillData && isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        name: prefillData.name || prev.name,
+        email: prefillData.email || prev.email,
+        date: prefillData.date || prev.date,
+        duration: prefillData.duration || prev.duration,
+      }))
+      // If we have name/email/date/duration, jump to step 4 (Payment)
+      // but we still need phone, so jump to step 2 (Personal)
+      setStep(2)
+    }
+  }, [prefillData, isOpen])
 
-  const handleNext = () => setStep(step + 1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [bookingResult, setBookingResult] = useState(null)
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch(API.settings)
+        .then(res => res.json())
+        .then(data => setSettings(data.data))
+        .catch(err => console.error('Error fetching settings:', err))
+    }
+  }, [isOpen])
+
+  if (!room && step !== 5) return null
+
+  const handleNext = () => {
+    if (step === 3 && !formData.date) {
+      alert('Please select a check-in date.')
+      return
+    }
+    setStep(step + 1)
+  }
   const handleBack = () => setStep(step - 1)
+
+  const handleConfirmBooking = async () => {
+    setIsSubmitting(true)
+    try {
+      const bookingData = {
+        guestName: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        suiteTitle: room.title,
+        suitePrice: room.price,
+        checkInDate: formData.date,
+        duration: parseInt(formData.duration),
+        totalAmount: (room.price * parseInt(formData.duration)) + 50,
+        paymentMethod: formData.paymentMethod,
+        paymentStatus: formData.paymentMethod === 'PayPal' ? 'Completed' : 'Pending'
+      }
+
+      const response = await fetch(API.bookings, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData)
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setBookingResult(data.data)
+        setStep(5)
+      } else {
+        alert('Booking failed: ' + data.message)
+      }
+    } catch (error) {
+      console.error('Error confirming booking:', error)
+      alert('An error occurred while confirming your booking.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const steps = [
     { title: 'Details', icon: Clock },
     { title: 'Contact', icon: User },
-    { title: 'Stay', icon: Calendar }
+    { title: 'Stay', icon: Calendar },
+    { title: 'Payment', icon: CreditCard }
   ]
 
   return (
@@ -47,34 +127,39 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
             <div className="p-8 md:p-12 min-h-full flex flex-col">
               
               {/* Header */}
-              <div className="flex justify-between items-center mb-12">
-                <div className="text-xl font-display font-bold text-white tracking-tighter">
-                  RESERVE<span className="text-sensual-red">SUITE</span>
+              <div className="flex justify-between items-center mb-8 md:mb-12">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-full overflow-hidden border border-sensual-red/20">
+                    <img src={logoLady} alt="Fantasy Island Logo" className="w-full h-full object-cover scale-150" />
+                  </div>
+                  <div className="text-lg md:text-xl font-display font-bold text-white tracking-tighter">
+                    RESERVE<span className="text-sensual-red">SUITE</span>
+                  </div>
                 </div>
                 <button 
                   onClick={onClose}
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
 
-              {step < 4 && (
+              {step < 5 && (
                 <>
                   {/* Step Indicator */}
-                  <div className="flex items-center justify-between mb-12">
+                  <div className="flex items-center justify-between mb-8 md:mb-12">
                     {steps.map((s, i) => (
                       <div key={i} className="flex flex-col items-center flex-1 relative">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-500 ${
+                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center mb-1.5 md:mb-2 transition-all duration-500 ${
                           step >= i + 1 ? 'bg-sensual-red text-white red-shadow' : 'bg-white/5 text-white/20'
                         }`}>
-                          <s.icon size={18} />
+                          <s.icon size={14} md:size={18} />
                         </div>
-                        <span className={`text-[10px] uppercase tracking-widest font-bold ${
+                        <span className={`text-[8px] md:text-[10px] uppercase tracking-widest font-bold ${
                           step >= i + 1 ? 'text-white' : 'text-white/20'
                         }`}>{s.title}</span>
-                        {i < 2 && (
-                          <div className={`absolute top-5 -right-1/2 w-full h-[1px] ${
+                        {i < 3 && (
+                          <div className={`absolute top-4 md:top-5 -right-1/2 w-full h-[1px] ${
                             step > i + 1 ? 'bg-sensual-red' : 'bg-white/10'
                           }`} />
                         )}
@@ -92,18 +177,42 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -20 }}
                         >
-                          <img src={room.img} alt={room.title} className="w-full h-48 object-cover rounded-3xl mb-8 border border-white/10" />
-                          <h3 className="text-3xl font-display mb-4">{room.title}</h3>
-                          <div className="text-2xl font-bold text-sensual-red mb-6">${room.price} <span className="text-white/20 text-sm font-light uppercase tracking-widest">/ Night</span></div>
-                          <p className="text-white/50 text-sm leading-relaxed mb-8">
+                          <div className="relative mb-6 md:mb-8 group">
+                            <motion.img 
+                              key={activeImg}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              src={(room.images && room.images.length > 0) ? room.images[activeImg] : room.img} 
+                              alt={room.title} 
+                              className="w-full h-40 md:h-48 object-cover rounded-2xl md:rounded-3xl border border-white/10" 
+                            />
+                            
+                            {room.images && room.images.length > 1 && (
+                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5 p-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
+                                {room.images.map((_, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => setActiveImg(i)}
+                                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                      activeImg === i ? 'bg-sensual-red w-4' : 'bg-white/20 hover:bg-white/40'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <h3 className="text-2xl md:text-3xl font-display mb-2 md:mb-4">{room.title}</h3>
+                          <div className="text-xl md:text-2xl font-bold text-sensual-red mb-4 md:mb-6">${room.price} <span className="text-white/20 text-[10px] md:text-sm font-light uppercase tracking-widest">/ Night</span></div>
+                          <p className="text-white/50 text-[11px] md:text-sm leading-relaxed mb-6 md:mb-8">
                             Experience absolute privacy in our most sought-after obsidian finished sanctuary. 
                             Includes all standard luxury amenities and personal concierge support.
                           </p>
-                          <div className="space-y-3 mb-10">
+                          <div className="grid grid-cols-2 gap-2 md:gap-3 mb-8 md:mb-10">
                             {room.features.map((f, i) => (
-                              <div key={i} className="flex items-center text-white/70 text-xs">
-                                <div className="w-1.5 h-1.5 bg-sensual-red rounded-full mr-3" />
-                                {f}
+                              <div key={i} className="flex items-center text-white/70 text-[9px] md:text-xs bg-white/5 p-2 rounded-lg border border-white/5">
+                                <div className="w-1.5 h-1.5 bg-sensual-red rounded-full mr-2 shrink-0" />
+                                <span className="truncate">{f}</span>
                               </div>
                             ))}
                           </div>
@@ -172,6 +281,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
                               <input 
                                 required
                                 type="date" 
+                                min={new Date().toISOString().split('T')[0]}
                                 className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-sm [color-scheme:dark]"
                                 value={formData.date}
                                 onChange={(e) => setFormData({...formData, date: e.target.value})}
@@ -184,7 +294,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
                                 value={formData.duration}
                                 onChange={(e) => setFormData({...formData, duration: e.target.value})}
                               >
-                                {[1,2,3,4,5,6,7].map(n => (
+                                {Array.from({ length: room.maxDays || 7 }, (_, i) => i + 1).map(n => (
                                   <option key={n} value={n} className="bg-obsidian">{n} Night{n > 1 ? 's' : ''}</option>
                                 ))}
                               </select>
@@ -208,6 +318,140 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
                           </div>
                         </motion.div>
                       )}
+                      {step === 4 && (
+                        <motion.div
+                          key="step4"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="space-y-6"
+                        >
+                          <h3 className="text-2xl font-display mb-8">Payment Method</h3>
+                          <div className="space-y-4 mb-10">
+                            {[
+                              { id: 'Bank Transfer', icon: Landmark, desc: 'Direct secure transfer' },
+                              { id: 'PayPal', icon: Send, desc: 'Fast digital checkout' },
+                              { id: 'Bitcoin', icon: Bitcoin, desc: 'Request for tags' }
+                            ].map((m) => (
+                              <button
+                                key={m.id}
+                                onClick={() => setFormData({ ...formData, paymentMethod: m.id })}
+                                className={`w-full p-6 rounded-2xl border transition-all duration-300 text-left flex items-center group ${
+                                  formData.paymentMethod === m.id 
+                                    ? 'bg-sensual-red/10 border-sensual-red red-shadow' 
+                                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                                }`}
+                              >
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-6 transition-colors ${
+                                  formData.paymentMethod === m.id ? 'bg-sensual-red text-white' : 'bg-white/5 text-white/40'
+                                }`}>
+                                  <m.icon size={24} />
+                                </div>
+                                <div>
+                                  <div className={`font-bold uppercase tracking-widest text-sm ${
+                                    formData.paymentMethod === m.id ? 'text-white' : 'text-white/60'
+                                  }`}>{m.id}</div>
+                                  <div className="text-[10px] text-white/20 uppercase tracking-widest mt-1">{m.desc}</div>
+                                </div>
+                                {formData.paymentMethod === m.id && (
+                                  <div className="ml-auto w-2 h-2 rounded-full bg-sensual-red animate-pulse" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Payment Specific Content */}
+                          <AnimatePresence mode="wait">
+                            {formData.paymentMethod === 'PayPal' && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="p-6 rounded-3xl bg-white/5 border border-white/10"
+                              >
+                                <PayPalButtons 
+                                  style={{ layout: "vertical", color: "blue", shape: "pill", label: "pay" }}
+                                  createOrder={(data, actions) => {
+                                    return actions.order.create({
+                                      purchase_units: [{
+                                        amount: { value: ((room.price * formData.duration) + 50).toString() }
+                                      }]
+                                    });
+                                  }}
+                                  onApprove={(data, actions) => {
+                                    return actions.order.capture().then(() => {
+                                      handleConfirmBooking();
+                                    });
+                                  }}
+                                />
+                              </motion.div>
+                            )}
+
+                            {formData.paymentMethod === 'Bank Transfer' && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-4"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] text-white/40 uppercase tracking-widest">Bank Name</span>
+                                  <span className="text-sm font-bold">{settings?.bank_name || 'Obsidian Global Bank'}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] text-white/40 uppercase tracking-widest">Account Name</span>
+                                  <span className="text-sm font-bold">{settings?.account_name || 'Fantasy Island LTD'}</span>
+                                </div>
+                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                  <div>
+                                    <span className="text-[8px] text-white/20 uppercase tracking-widest block">Account Number</span>
+                                    <span className="text-sm font-mono tracking-tighter">{settings?.account_number || '0000 0000 0000 0000'}</span>
+                                  </div>
+                                  <button 
+                                    onClick={() => navigator.clipboard.writeText(settings?.account_number || '')}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-sensual-red"
+                                  >
+                                    <Copy size={16} />
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {formData.paymentMethod === 'Bitcoin' && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="p-8 rounded-3xl bg-sensual-red/5 border border-sensual-red/20 text-center"
+                              >
+                                <Bitcoin className="mx-auto text-sensual-red mb-4" size={40} />
+                                <h4 className="text-lg font-display mb-2">Crypto Payment</h4>
+                                <p className="text-[10px] text-white/40 leading-relaxed mb-6 uppercase tracking-widest">
+                                  Please send the total amount to the address below. 
+                                  Your booking will be confirmed after 2 confirmations.
+                                </p>
+                                <div className="p-4 bg-black/40 rounded-2xl border border-white/5 flex items-center justify-between mb-6">
+                                  <span className="text-[10px] font-mono text-white/60 truncate mr-4">{settings?.bitcoin_address || 'bc1q...'}</span>
+                                  <button 
+                                    onClick={() => navigator.clipboard.writeText(settings?.bitcoin_address || '')}
+                                    className="p-2 bg-sensual-red text-white rounded-lg"
+                                  >
+                                    <Copy size={14} />
+                                  </button>
+                                </div>
+                                <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-white/10 transition-all">
+                                  <span>Verify Transaction</span>
+                                  <ExternalLink size={14} />
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          
+                          <p className="text-[10px] text-white/20 text-center uppercase tracking-widest mt-8">
+                            Absolute confidentiality guaranteed &bull; Secure gateway
+                          </p>
+                        </motion.div>
+                      )}
                     </AnimatePresence>
                   </div>
 
@@ -221,19 +465,22 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
                         Back
                       </button>
                     )}
-                    <button 
-                      onClick={step === 3 ? handleNext : handleNext}
-                      className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all"
-                    >
-                      <span>{step === 3 ? 'Confirm Booking' : 'Continue'}</span>
-                      <ChevronRight size={18} />
-                    </button>
+                    {step !== 4 || formData.paymentMethod !== 'PayPal' ? (
+                      <button 
+                        onClick={step === 4 ? handleConfirmBooking : handleNext}
+                        disabled={isSubmitting}
+                        className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span>{isSubmitting ? 'Processing...' : (step === 4 ? 'Confirm Booking' : 'Continue')}</span>
+                        {!isSubmitting && <ChevronRight size={18} />}
+                      </button>
+                    ) : null}
                   </div>
                 </>
               )}
 
               {/* Success/Receipt State */}
-              {step === 4 && (
+              {step === 5 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -244,7 +491,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
                       <CheckCircle2 className="text-white w-8 h-8" />
                     </div>
                     <h2 className="text-3xl font-display">Booking Confirmed</h2>
-                    <p className="text-white/40 text-xs uppercase tracking-widest mt-2">ID: FI-{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                    <p className="text-white/40 text-xs uppercase tracking-widest mt-2">ID: {bookingResult?._id || 'FI-TEMP'}</p>
                   </div>
 
                   {/* Receipt Card */}
@@ -271,9 +518,13 @@ const CheckoutDrawer = ({ isOpen, onClose, room }) => {
                         <span className="text-sm">{room.title}</span>
                         <span className="font-bold">${room.price} x {formData.duration}</span>
                       </div>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mb-2">
                         <span className="text-sm">Service Fee</span>
                         <span className="font-bold">$50</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sensual-red">
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Method</span>
+                        <span className="font-bold text-xs uppercase tracking-widest">{formData.paymentMethod}</span>
                       </div>
                     </div>
 
