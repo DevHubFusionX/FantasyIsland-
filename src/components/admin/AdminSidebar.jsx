@@ -9,7 +9,6 @@ const AdminSidebar = () => {
   const [isOpen, setIsOpen] = useState(false)
   
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
     { name: 'Reservations', icon: Calendar, path: '/admin/bookings' },
     { name: 'Suites', icon: HomeIcon, path: '/admin/suites' },
     { name: 'Settings', icon: Settings, path: '/admin/settings' },

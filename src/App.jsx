@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import LandingPage from './pages/LandingPage'
 import RoomsPage from './pages/RoomsPage'
@@ -56,9 +56,7 @@ function App() {
                   </Suspense>
                 </ProtectedRoute>
               }>
-                <Route index element={
-                  <Suspense fallback={<AdminFallback />}><AdminHome /></Suspense>
-                } />
+                <Route index element={<Navigate to="bookings" replace />} />
                 <Route path="bookings" element={
                   <Suspense fallback={<AdminFallback />}><AdminBookings /></Suspense>
                 } />
