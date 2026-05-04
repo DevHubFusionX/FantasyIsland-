@@ -8,8 +8,6 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import CheckoutDrawer from '../components/CheckoutDrawer'
 
-import { API } from '../config/api'
-
 const RoomCard = React.memo(({ title, price, img, features, icon: Icon, delay, onReserve }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
