@@ -49,8 +49,6 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     }
   }, [isOpen])
 
-  if (!room && step !== 5) return null
-
   const handleNext = () => {
     if (step === 3 && !formData.date) {
       alert('Please select a check-in date.')
@@ -100,6 +98,10 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   }
 
   const [isDownloading, setIsDownloading] = useState(false)
+
+  // Early return AFTER all hooks are declared (Rules of Hooks)
+  if (!room && step !== 5) return null
+
   const handleDownloadReceipt = async () => {
     if (!receiptRef.current) return
     setIsDownloading(true)
