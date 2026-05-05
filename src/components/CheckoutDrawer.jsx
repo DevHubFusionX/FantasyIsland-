@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download } from 'lucide-react'
+import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download, Maximize2 } from 'lucide-react'
 import { API } from '../config/api'
 import { PayPalButtons } from "@paypal/react-paypal-js"
 import logoLady from '../assets/logo-lady.png'
@@ -98,9 +98,42 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   }
 
   const [isDownloading, setIsDownloading] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [slideDirection, setSlideDirection] = useState(0) // -1 left, 1 right
 
   // Early return AFTER all hooks are declared (Rules of Hooks)
   if (!room && step !== 5) return null
+
+  const images = (room?.gallery && room.gallery.length > 0) ? room.gallery : (room?.img ? [room.img] : [])
+  const totalImages = images.length
+
+  const goToImage = (index) => {
+    if (index === activeImg) return
+    setSlideDirection(index > activeImg ? 1 : -1)
+    setActiveImg(index)
+  }
+  const nextImage = () => {
+    if (totalImages <= 1) return
+    setSlideDirection(1)
+    setActiveImg((prev) => (prev + 1) % totalImages)
+  }
+  const prevImage = () => {
+    if (totalImages <= 1) return
+    setSlideDirection(-1)
+    setActiveImg((prev) => (prev - 1 + totalImages) % totalImages)
+  }
+
+  const handleSwipe = (e, info) => {
+    const threshold = 50
+    if (info.offset.x < -threshold) nextImage()
+    else if (info.offset.x > threshold) prevImage()
+  }
+
+  const slideVariants = {
+    enter: (dir) => ({ x: dir > 0 ? 200 : -200, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir) => ({ x: dir > 0 ? -200 : 200, opacity: 0 })
+  }
 
   const handleDownloadReceipt = async () => {
     if (!receiptRef.current) return
@@ -209,30 +242,147 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -20 }}
                         >
+                          {/* Image Carousel */}
                           <div className="relative mb-6 md:mb-8 group">
-                            <motion.img 
-                              key={activeImg}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              src={(room.gallery && room.gallery.length > 0) ? room.gallery[activeImg] : room.img} 
-                              alt={room.title} 
-                              className="w-full h-40 md:h-48 object-cover rounded-2xl md:rounded-3xl border border-white/10" 
-                            />
-                            
-                            {room.gallery && room.gallery.length > 1 && (
-                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5 p-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
-                                {room.gallery.map((_, i) => (
+                            <div className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 h-40 md:h-48">
+                              <AnimatePresence initial={false} custom={slideDirection} mode="popLayout">
+                                <motion.img
+                                  key={activeImg}
+                                  custom={slideDirection}
+                                  variants={slideVariants}
+                                  initial="enter"
+                                  animate="center"
+                                  exit="exit"
+                                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                  drag="x"
+                                  dragConstraints={{ left: 0, right: 0 }}
+                                  dragElastic={0.7}
+                                  onDragEnd={handleSwipe}
+                                  src={images[activeImg]}
+                                  alt={room.title}
+                                  className="w-full h-full object-cover absolute inset-0 cursor-grab active:cursor-grabbing"
+                                />
+                              </AnimatePresence>
+
+                              {/* Expand / Lightbox Button */}
+                              <button
+                                onClick={() => setLightboxOpen(true)}
+                                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-10"
+                              >
+                                <Maximize2 size={14} />
+                              </button>
+
+                              {/* Left Arrow */}
+                              {totalImages > 1 && (
+                                <button
+                                  onClick={prevImage}
+                                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-10"
+                                >
+                                  <ChevronLeft size={16} />
+                                </button>
+                              )}
+
+                              {/* Right Arrow */}
+                              {totalImages > 1 && (
+                                <button
+                                  onClick={nextImage}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-10"
+                                >
+                                  <ChevronRight size={16} />
+                                </button>
+                              )}
+
+                              {/* Image Counter */}
+                              {totalImages > 1 && (
+                                <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full border border-white/10 text-[10px] text-white/70 font-bold tracking-wider z-10">
+                                  {activeImg + 1}/{totalImages}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Dot Indicators */}
+                            {totalImages > 1 && (
+                              <div className="flex justify-center space-x-1.5 mt-3">
+                                {images.map((_, i) => (
                                   <button
                                     key={i}
-                                    onClick={() => setActiveImg(i)}
-                                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                                      activeImg === i ? 'bg-sensual-red w-4' : 'bg-white/20 hover:bg-white/40'
+                                    onClick={() => goToImage(i)}
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                                      activeImg === i ? 'bg-sensual-red w-5' : 'bg-white/15 w-1.5 hover:bg-white/30'
                                     }`}
                                   />
                                 ))}
                               </div>
                             )}
                           </div>
+
+                          {/* Lightbox Overlay */}
+                          <AnimatePresence>
+                            {lightboxOpen && (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[200] flex items-center justify-center p-4"
+                                onClick={() => setLightboxOpen(false)}
+                              >
+                                {/* Close Button */}
+                                <button
+                                  onClick={() => setLightboxOpen(false)}
+                                  className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all z-10"
+                                >
+                                  <X size={20} />
+                                </button>
+
+                                {/* Lightbox Image */}
+                                <div className="relative max-w-[90vw] max-h-[85vh] w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                                  <AnimatePresence initial={false} custom={slideDirection} mode="popLayout">
+                                    <motion.img
+                                      key={`lb-${activeImg}`}
+                                      custom={slideDirection}
+                                      variants={slideVariants}
+                                      initial="enter"
+                                      animate="center"
+                                      exit="exit"
+                                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                      drag="x"
+                                      dragConstraints={{ left: 0, right: 0 }}
+                                      dragElastic={0.7}
+                                      onDragEnd={handleSwipe}
+                                      src={images[activeImg]}
+                                      alt={room.title}
+                                      className="max-w-full max-h-[85vh] object-contain rounded-2xl cursor-grab active:cursor-grabbing"
+                                    />
+                                  </AnimatePresence>
+
+                                  {/* Lightbox Arrows */}
+                                  {totalImages > 1 && (
+                                    <>
+                                      <button
+                                        onClick={prevImage}
+                                        className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all"
+                                      >
+                                        <ChevronLeft size={20} />
+                                      </button>
+                                      <button
+                                        onClick={nextImage}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all"
+                                      >
+                                        <ChevronRight size={20} />
+                                      </button>
+                                    </>
+                                  )}
+
+                                  {/* Lightbox Counter */}
+                                  {totalImages > 1 && (
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full border border-white/10 text-xs text-white/70 font-bold tracking-wider">
+                                      {activeImg + 1} / {totalImages}
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
 
                           <h3 className="text-2xl md:text-3xl font-display mb-2 md:mb-4">{room.title}</h3>
                           <div className="text-xl md:text-2xl font-bold text-sensual-red mb-4 md:mb-6">${room.price} <span className="text-white/20 text-[10px] md:text-sm font-light uppercase tracking-widest">/ Night</span></div>
