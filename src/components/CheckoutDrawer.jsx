@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
 import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download, Maximize2 } from 'lucide-react'
-import { API } from '../config/api'
+import { API, formatImageUrl } from '../config/api'
 import { PayPalButtons } from "@paypal/react-paypal-js"
 import logoLady from '../assets/logo-lady.png'
 import jsPDF from 'jspdf'
@@ -11,6 +13,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   const receiptRef = useRef(null)
   const [activeImg, setActiveImg] = useState(0)
   const [step, setStep] = useState(1) // 1: Info, 2: Personal, 3: Stay, 4: Payment, 5: Success
+  const [bookingResult, setBookingResult] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -36,66 +39,64 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     }
   }, [prefillData, isOpen])
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [bookingResult, setBookingResult] = useState(null)
-  const [settings, setSettings] = useState(null)
+  const { data: settingsData } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const res = await fetch(API.settings)
+      const data = await res.json()
+      return data.data
+    },
+    enabled: isOpen
+  })
+  const settings = settingsData || null
 
-  useEffect(() => {
-    if (isOpen) {
-      fetch(API.settings)
-        .then(res => res.json())
-        .then(data => setSettings(data.data))
-        .catch(err => console.error('Error fetching settings:', err))
+  const bookingMutation = useMutation({
+    mutationFn: async (bookingData) => {
+      const response = await fetch(API.bookings, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      })
+      const data = await response.json()
+      if (!data.success) throw new Error(data.message)
+      return data.data
+    },
+    onSuccess: (data) => {
+      setBookingResult(data)
+      setStep(5)
+      toast.success('Reservation confirmed')
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to confirm reservation')
     }
-  }, [isOpen])
+  })
+
+  const handleConfirmBooking = () => {
+    const bookingData = {
+      guestName: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      suiteTitle: room.title,
+      suitePrice: room.price,
+      checkInDate: formData.date,
+      duration: parseInt(formData.duration),
+      totalAmount: (room.price * parseInt(formData.duration)) + 50,
+      paymentMethod: formData.paymentMethod,
+      paymentStatus: formData.paymentMethod === 'PayPal' ? 'Completed' : 'Pending'
+    }
+    bookingMutation.mutate(bookingData)
+  }
 
   const handleNext = () => {
     if (step === 3 && !formData.date) {
-      alert('Please select a check-in date.')
+      toast.error('Please select a check-in date.')
       return
     }
     setStep(step + 1)
   }
   const handleBack = () => setStep(step - 1)
 
-  const handleConfirmBooking = async () => {
-    setIsSubmitting(true)
-    try {
-      const bookingData = {
-        guestName: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        suiteTitle: room.title,
-        suitePrice: room.price,
-        checkInDate: formData.date,
-        duration: parseInt(formData.duration),
-        totalAmount: (room.price * parseInt(formData.duration)) + 50,
-        paymentMethod: formData.paymentMethod,
-        paymentStatus: formData.paymentMethod === 'PayPal' ? 'Completed' : 'Pending'
-      }
-
-      const response = await fetch(API.bookings, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(bookingData)
-      })
-
-      const data = await response.json()
-      if (data.success) {
-        setBookingResult(data.data)
-        setStep(5)
-      } else {
-        alert('Booking failed: ' + data.message)
-      }
-    } catch (error) {
-      console.error('Error confirming booking:', error)
-      alert('An error occurred while confirming your booking.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const isSubmitting = bookingMutation.isPending
 
   const [isDownloading, setIsDownloading] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -104,7 +105,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   // Early return AFTER all hooks are declared (Rules of Hooks)
   if (!room && step !== 5) return null
 
-  const images = (room?.gallery && room.gallery.length > 0) ? room.gallery : (room?.img ? [room.img] : [])
+  const images = ((room?.gallery && room.gallery.length > 0) ? room.gallery : (room?.img ? [room.img] : [])).map(formatImageUrl)
   const totalImages = images.length
 
   const goToImage = (index) => {

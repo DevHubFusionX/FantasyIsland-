@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, User, Mail, Calendar, Home, CreditCard, Save, Clock, Hash, Smartphone, DollarSign, Fingerprint } from 'lucide-react'
 
@@ -58,7 +59,7 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
     'Completed': 'text-blue-500 bg-blue-500/10'
   }
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6">
         <motion.div
@@ -261,7 +262,8 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
 

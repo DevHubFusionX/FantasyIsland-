@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, MapPin, User, Mail, Calendar, CheckCircle, Loader2, ChevronDown } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
 import { useLocation } from '../hooks/useLocation'
 import { API } from '../config/api'
 
@@ -42,55 +44,57 @@ const Hero = () => {
     }))
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setFormState('submitting')
-    
-    try {
-      const config = roomConfig[formData.room]
-      const duration = parseInt(formData.duration)
-      const bookingData = {
-        guestName: formData.name,
-        email: formData.email,
-        phone: 'N/A',
-        suiteTitle: formData.room,
-        suitePrice: config.price,
-        checkInDate: formData.date,
-        duration: duration,
-        totalAmount: (config.price * duration) + 50,
-        paymentMethod: 'Bank Transfer',
-        paymentStatus: 'Pending'
-      }
-
+  const bookingMutation = useMutation({
+    mutationFn: async (bookingData) => {
       const response = await fetch(API.bookings, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData)
       })
-
       const data = await response.json()
-      if (data.success) {
-        // Redirect to rooms page with pre-filled data to start the booking flow
-        navigate('/rooms', { 
-          state: { 
-            prefill: {
-              name: formData.name,
-              email: formData.email,
-              room: formData.room,
-              date: formData.date,
-              duration: formData.duration
-            } 
+      if (!data.success) throw new Error(data.message)
+      return data.data
+    },
+    onSuccess: (data) => {
+      // Redirect to rooms page with pre-filled data to start the booking flow
+      navigate('/rooms', { 
+        state: { 
+          prefill: {
+            name: formData.name,
+            email: formData.email,
+            room: formData.room,
+            date: formData.date,
+            duration: formData.duration
           } 
-        })
-      } else {
-        alert('Booking failed: ' + data.message)
-        setFormState('idle')
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      setFormState('idle')
+        } 
+      })
+      toast.success('Availability confirmed')
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to check availability')
     }
+  })
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const config = roomConfig[formData.room]
+    const duration = parseInt(formData.duration)
+    const bookingData = {
+      guestName: formData.name,
+      email: formData.email,
+      phone: 'N/A',
+      suiteTitle: formData.room,
+      suitePrice: config.price,
+      checkInDate: formData.date,
+      duration: duration,
+      totalAmount: (config.price * duration) + 50,
+      paymentMethod: 'Bank Transfer',
+      paymentStatus: 'Pending'
+    }
+    bookingMutation.mutate(bookingData)
   }
+
+  const isSubmitting = bookingMutation.isPending
 
   const renderDurationOptions = () => {
     const config = roomConfig[formData.room]
@@ -263,10 +267,10 @@ const Hero = () => {
 
                     <button 
                       type="submit"
-                      disabled={formState === 'submitting'}
+                      disabled={isSubmitting}
                       className="w-full bg-sensual-red/90 hover:bg-sensual-red text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-sensual-red/20 flex items-center justify-center space-x-3 disabled:opacity-50 text-[11px]"
                     >
-                      {formState === 'submitting' ? (
+                      {isSubmitting ? (
                         <Loader2 className="animate-spin" size={18} />
                       ) : (
                         <>

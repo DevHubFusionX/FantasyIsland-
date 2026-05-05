@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, CheckCircle2, Star, Shield, Flame, Loader2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
-import { API } from '../config/api'
+import { API, formatImageUrl } from '../config/api'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import CheckoutDrawer from '../components/CheckoutDrawer'
@@ -17,7 +17,7 @@ const RoomCard = React.memo(({ title, price, img, features, icon: Icon, delay, o
   >
     <div className="relative h-64 md:h-80 overflow-hidden">
       <img 
-        src={img} 
+        src={formatImageUrl(img)} 
         alt={title} 
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[20%] group-hover:grayscale-0"
       />

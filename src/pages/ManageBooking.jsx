@@ -1,78 +1,87 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Calendar, User, Phone, Mail, Clock, Save, Trash2, CheckCircle2 } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
 import { API } from '../config/api'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 const ManageBooking = () => {
+  const queryClient = useQueryClient()
   const [bookingId, setBookingId] = useState('')
-  const [booking, setBooking] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [message, setMessage] = useState('')
+  const [searchId, setSearchId] = useState(null)
+  const [localBooking, setLocalBooking] = useState(null)
 
-  const handleSearch = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage('')
-    try {
-      const response = await fetch(`${API.bookings}/${bookingId}`)
+  const { data: booking, isLoading: loading, error } = useQuery({
+    queryKey: ['booking', searchId],
+    queryFn: async () => {
+      const response = await fetch(`${API.bookings}/${searchId}`)
       const data = await response.json()
-      if (data.success) {
-        setBooking(data.data)
-      } else {
-        setMessage('Booking not found. Please check your ID.')
-      }
-    } catch (error) {
-      console.error('Search error:', error)
-      setMessage('Error fetching booking.')
-    } finally {
-      setLoading(false)
-    }
-  }
+      if (!data.success) throw new Error('Booking not found')
+      setLocalBooking(data.data)
+      return data.data
+    },
+    enabled: !!searchId,
+    retry: false
+  })
 
-  const handleUpdate = async (e) => {
-    e.preventDefault()
-    setIsUpdating(true)
-    try {
-      const response = await fetch(`${API.bookings}/${booking._id}`, {
+  const updateMutation = useMutation({
+    mutationFn: async (updatedData) => {
+      const response = await fetch(`${API.bookings}/${updatedData._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(booking)
+        body: JSON.stringify(updatedData)
       })
       const data = await response.json()
-      if (data.success) {
-        setBooking(data.data)
-        alert('Booking updated successfully!')
-      } else {
-        alert('Update failed: ' + data.message)
-      }
-    } catch (error) {
-      console.error('Update error:', error)
-      alert('Error updating booking.')
-    } finally {
-      setIsUpdating(false)
+      if (!data.success) throw new Error(data.message)
+      return data.data
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['booking', searchId], data)
+      setLocalBooking(data)
+      toast.success('Reservation updated')
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Update failed')
     }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(`${API.bookings}/${id}`, { method: 'DELETE' })
+      const data = await response.json()
+      if (!data.success) throw new Error(data.message)
+      return data
+    },
+    onSuccess: () => {
+      toast.success('Reservation cancelled')
+      setSearchId(null)
+      setLocalBooking(null)
+      setBookingId('')
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Cancellation failed')
+    }
+  })
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (!bookingId.trim()) return
+    setSearchId(bookingId.trim())
   }
 
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return
-    try {
-      const response = await fetch(`${API.bookings}/${booking._id}`, {
-        method: 'DELETE'
-      })
-      const data = await response.json()
-      if (data.success) {
-        alert('Booking cancelled.')
-        setBooking(null)
-        setBookingId('')
-      }
-    } catch (error) {
-      console.error('Delete error:', error)
-      alert('Error cancelling booking.')
-    }
+  const handleUpdate = (e) => {
+    e.preventDefault()
+    updateMutation.mutate(localBooking)
   }
+
+  const handleDelete = () => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return
+    deleteMutation.mutate(localBooking._id)
+  }
+
+  const isUpdating = updateMutation.isPending
 
   return (
     <div className="bg-obsidian min-h-screen text-white font-sans">
@@ -113,7 +122,6 @@ const ManageBooking = () => {
               >
                 {loading ? 'Searching...' : 'Find Reservation'}
               </button>
-              {message && <p className="text-sensual-red text-center text-sm">{message}</p>}
             </form>
           </motion.div>
         ) : (
@@ -126,32 +134,33 @@ const ManageBooking = () => {
             <div className="md:col-span-1 space-y-6">
               <div className="bg-sensual-red/10 border border-sensual-red/20 rounded-3xl p-6">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-10 h-10 bg-sensual-red rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-sensual-red rounded-full flex items-center justify-center text-white">
                     <CheckCircle2 size={20} />
                   </div>
                   <div>
                     <div className="text-[10px] text-white/40 uppercase tracking-widest">Status</div>
-                    <div className="font-bold text-sm uppercase tracking-widest">{booking.bookingStatus}</div>
+                    <div className="font-bold text-sm uppercase tracking-widest">{localBooking?.bookingStatus}</div>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-white/40 text-xs uppercase tracking-widest">Suite</span>
-                    <span className="text-sm font-bold">{booking.suiteTitle}</span>
+                    <span className="text-sm font-bold">{localBooking?.suiteTitle}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40 text-xs uppercase tracking-widest">Total Paid</span>
-                    <span className="text-sm font-bold text-sensual-red">${booking.totalAmount}</span>
+                    <span className="text-sm font-bold text-sensual-red">${localBooking?.totalAmount}</span>
                   </div>
                 </div>
               </div>
               
               <button 
                 onClick={handleDelete}
-                className="w-full py-4 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 text-white/40 hover:text-red-500 rounded-2xl transition-all flex items-center justify-center space-x-2 text-xs uppercase tracking-widest font-bold"
+                disabled={deleteMutation.isPending}
+                className="w-full py-4 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 text-white/40 hover:text-red-500 rounded-2xl transition-all flex items-center justify-center space-x-2 text-xs uppercase tracking-widest font-bold disabled:opacity-50"
               >
-                <Trash2 size={16} />
-                <span>Cancel Booking</span>
+                {deleteMutation.isPending ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                <span>{deleteMutation.isPending ? 'Cancelling...' : 'Cancel Booking'}</span>
               </button>
             </div>
 
@@ -167,8 +176,8 @@ const ManageBooking = () => {
                         <input 
                           type="text" 
                           className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={booking.guestName}
-                          onChange={(e) => setBooking({...booking, guestName: e.target.value})}
+                          value={localBooking?.guestName || ''}
+                          onChange={(e) => setLocalBooking({...localBooking, guestName: e.target.value})}
                         />
                       </div>
                     </div>
@@ -179,8 +188,8 @@ const ManageBooking = () => {
                         <input 
                           type="email" 
                           className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={booking.email}
-                          onChange={(e) => setBooking({...booking, email: e.target.value})}
+                          value={localBooking?.email || ''}
+                          onChange={(e) => setLocalBooking({...localBooking, email: e.target.value})}
                         />
                       </div>
                     </div>
@@ -191,8 +200,8 @@ const ManageBooking = () => {
                         <input 
                           type="tel" 
                           className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={booking.phone}
-                          onChange={(e) => setBooking({...booking, phone: e.target.value})}
+                          value={localBooking?.phone || ''}
+                          onChange={(e) => setLocalBooking({...localBooking, phone: e.target.value})}
                         />
                       </div>
                     </div>
@@ -203,8 +212,8 @@ const ManageBooking = () => {
                         <input 
                           type="date" 
                           className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm [color-scheme:dark]"
-                          value={booking.checkInDate.split('T')[0]}
-                          onChange={(e) => setBooking({...booking, checkInDate: e.target.value})}
+                          value={localBooking?.checkInDate?.split('T')[0] || ''}
+                          onChange={(e) => setLocalBooking({...localBooking, checkInDate: e.target.value})}
                         />
                       </div>
                     </div>
@@ -216,8 +225,8 @@ const ManageBooking = () => {
                           type="number" 
                           min="1"
                           className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={booking.duration}
-                          onChange={(e) => setBooking({...booking, duration: e.target.value})}
+                          value={localBooking?.duration || ''}
+                          onChange={(e) => setLocalBooking({...localBooking, duration: e.target.value})}
                         />
                       </div>
                     </div>
@@ -226,9 +235,9 @@ const ManageBooking = () => {
                   <button 
                     type="submit"
                     disabled={isUpdating}
-                    className="w-full py-4 bg-white/5 border border-sensual-red/30 hover:bg-sensual-red text-white font-bold uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center space-x-2"
+                    className="w-full py-4 bg-white/5 border border-sensual-red/30 hover:bg-sensual-red text-white font-bold uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
                   >
-                    <Save size={18} />
+                    {isUpdating ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                     <span>{isUpdating ? 'Saving...' : 'Save Changes'}</span>
                   </button>
                 </form>

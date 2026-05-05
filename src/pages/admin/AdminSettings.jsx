@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Save, Loader2, CreditCard, Landmark, Bitcoin, ShieldCheck, RefreshCw } from 'lucide-react'
 import { API } from '../../config/api'
 import apiClient from '../../config/apiClient'
+import { toast } from 'react-hot-toast'
 
 const AdminSettings = () => {
   const queryClient = useQueryClient()
@@ -29,7 +30,10 @@ const AdminSettings = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['settings'])
-      alert('System configurations updated successfully!')
+      toast.success('System configurations updated')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to update settings')
     }
   })
 

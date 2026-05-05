@@ -5,6 +5,7 @@ import SuiteModal from '../../components/admin/SuiteModal'
 import { API } from '../../config/api'
 import apiClient from '../../config/apiClient'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-hot-toast'
 
 const IconMap = { Shield, Star, Flame }
 
@@ -31,6 +32,10 @@ const AdminSuites = () => {
       queryClient.invalidateQueries(['suites'])
       setIsModalOpen(false)
       setSelectedSuite(null)
+      toast.success('Suite created successfully')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to create suite')
     }
   })
 
@@ -43,6 +48,10 @@ const AdminSuites = () => {
       queryClient.invalidateQueries(['suites'])
       setIsModalOpen(false)
       setSelectedSuite(null)
+      toast.success('Suite updated successfully')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to update suite')
     }
   })
 
@@ -53,6 +62,10 @@ const AdminSuites = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['suites'])
+      toast.success('Suite removed from inventory')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to delete suite')
     }
   })
 

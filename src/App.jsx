@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
+import { Toaster } from 'react-hot-toast'
 import LandingPage from './pages/LandingPage'
 import RoomsPage from './pages/RoomsPage'
 import ManageBooking from './pages/ManageBooking'
@@ -14,6 +15,7 @@ const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
 const AdminHome = lazy(() => import('./pages/admin/AdminHome'))
 const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'))
 const AdminSuites = lazy(() => import('./pages/admin/AdminSuites'))
+const AdminTiers = lazy(() => import('./pages/admin/AdminTiers'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 
 const AdminFallback = () => (
@@ -38,6 +40,27 @@ function App() {
   return (
     <PayPalScriptProvider options={{ "client-id": "test" }}>
       <QueryClientProvider client={queryClient}>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: '#0D0202',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.05)',
+              borderRadius: '1rem',
+              fontSize: '12px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              padding: '16px 24px'
+            },
+            success: {
+              iconTheme: {
+                primary: '#C41E3A',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
         <AuthProvider>
           <Router>
           <div className="min-h-screen bg-obsidian text-white font-sans selection:bg-sensual-red selection:text-white">
@@ -62,6 +85,9 @@ function App() {
                 } />
                 <Route path="suites" element={
                   <Suspense fallback={<AdminFallback />}><AdminSuites /></Suspense>
+                } />
+                <Route path="tiers" element={
+                  <Suspense fallback={<AdminFallback />}><AdminTiers /></Suspense>
                 } />
                 <Route path="settings" element={
                   <Suspense fallback={<AdminFallback />}><AdminSettings /></Suspense>

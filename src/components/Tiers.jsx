@@ -1,10 +1,22 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Star, Flame, CheckCircle2 } from 'lucide-react'
+import { Heart, Star, Flame, CheckCircle2, Loader2, Shield } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { API } from '../config/api'
 
-const TierCard = ({ title, price, features, delay, icon: Icon, isPopular }) => {
+const IconMap = {
+  'Regular': Heart,
+  'VIP': Star,
+  'Membership': Flame,
+  'Standard': Shield
+}
+
+const TierCard = ({ title, price, features, delay, badge, subtitle, period }) => {
   const navigate = useNavigate()
+  const Icon = IconMap[badge] || IconMap[title] || Shield
+  const isPopular = badge === 'VIP'
+
   return (
     <motion.div 
     initial={{ opacity: 0, y: 50 }}
@@ -20,7 +32,7 @@ const TierCard = ({ title, price, features, delay, icon: Icon, isPopular }) => {
     <div className="absolute inset-0 bg-sensual-red/0 group-hover:bg-sensual-red/[0.03] transition-colors duration-500 pointer-events-none" />
     {isPopular && (
       <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-sensual-red text-white px-6 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest red-shadow">
-        Pure Indulgence
+        {subtitle}
       </div>
     )}
     
@@ -31,7 +43,7 @@ const TierCard = ({ title, price, features, delay, icon: Icon, isPopular }) => {
     <h3 className="text-4xl font-display mb-2 group-hover:text-sensual-red transition-colors">{title}</h3>
     <div className="flex items-baseline mb-8">
       <span className="text-5xl font-bold text-white">${price}</span>
-      <span className="text-white/40 ml-2 text-sm uppercase tracking-widest">/ Reservation</span>
+      <span className="text-white/40 ml-2 text-sm uppercase tracking-widest">{period || '/ Reservation'}</span>
     </div>
     
     <ul className="space-y-5 mb-12 flex-grow">
@@ -56,48 +68,14 @@ const TierCard = ({ title, price, features, delay, icon: Icon, isPopular }) => {
 )}
 
 const Tiers = () => {
-  const tiers = [
-    {
-      title: "Regular",
-      price: "580",
-      icon: Heart,
-      features: [
-        "Four curated sessions",
-        "Elegantly designed private room",
-        "Complimentary signature drink",
-        "Club facility access",
-        "Standard etiquette policy"
-      ],
-      delay: 0.1
-    },
-    {
-      title: "VIP",
-      price: "1000",
-      icon: Star,
-      isPopular: true,
-      features: [
-        "Eight immersive sessions",
-        "Premium velvet private suite",
-        "Premium open bar (Selection)",
-        "Priority VIP entrance",
-        "Personalized mood lighting"
-      ],
-      delay: 0.2
-    },
-    {
-      title: "Membership",
-      price: "1500",
-      icon: Flame,
-      features: [
-        "Unlimited sessions access",
-        "The Royal Obsidian Suite",
-        "Full premium complimentary bar",
-        "Personal lifestyle concierge",
-        "24/7 Priority booking"
-      ],
-      delay: 0.3
+  const { data: tiers, isLoading } = useQuery({
+    queryKey: ['tiers'],
+    queryFn: async () => {
+      const response = await fetch(API.tiers)
+      const data = await response.json()
+      return data.data
     }
-  ]
+  })
 
   return (
     <section id="tiers" className="py-32 px-6 md:px-12 bg-obsidian relative">
@@ -116,11 +94,18 @@ const Tiers = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {tiers.map((tier, index) => (
-            <TierCard key={index} {...tier} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="text-sensual-red animate-spin mb-4" size={48} />
+            <p className="text-white/20 uppercase tracking-widest text-xs">Syncing Tiers...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {tiers?.map((tier, index) => (
+              <TierCard key={tier._id} {...tier} delay={index * 0.1} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

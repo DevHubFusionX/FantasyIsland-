@@ -5,6 +5,7 @@ import BookingRow from '../../components/admin/BookingRow'
 import BookingModal from '../../components/admin/BookingModal'
 import { API } from '../../config/api'
 import apiClient from '../../config/apiClient'
+import { toast } from 'react-hot-toast'
 
 const AdminBookings = () => {
   const queryClient = useQueryClient()
@@ -29,6 +30,10 @@ const AdminBookings = () => {
       queryClient.invalidateQueries(['bookings'])
       setIsModalOpen(false)
       setSelectedBooking(null)
+      toast.success('Reservation recorded successfully')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to record reservation')
     }
   })
 
@@ -41,6 +46,10 @@ const AdminBookings = () => {
       queryClient.invalidateQueries(['bookings'])
       setIsModalOpen(false)
       setSelectedBooking(null)
+      toast.success('Reservation updated')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to update reservation')
     }
   })
 
@@ -51,6 +60,10 @@ const AdminBookings = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['bookings'])
+      toast.success('Reservation deleted')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to delete reservation')
     }
   })
 
