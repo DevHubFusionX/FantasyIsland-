@@ -267,7 +267,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               {/* Expand / Lightbox Button */}
                               <button
                                 onClick={() => setLightboxOpen(true)}
-                                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-10"
+                                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
                               >
                                 <Maximize2 size={14} />
                               </button>
@@ -276,7 +276,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               {totalImages > 1 && (
                                 <button
                                   onClick={prevImage}
-                                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-10"
+                                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
                                 >
                                   <ChevronLeft size={16} />
                                 </button>
@@ -286,7 +286,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               {totalImages > 1 && (
                                 <button
                                   onClick={nextImage}
-                                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-10"
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/70 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
                                 >
                                   <ChevronRight size={16} />
                                 </button>
