@@ -90,7 +90,7 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6">
+      <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -103,7 +103,7 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
           initial={{ opacity: 0, scale: 0.95, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 30 }}
-          className="relative w-full max-w-4xl bg-[#0D0202] border border-white/5 rounded-3xl md:rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col md:flex-row max-h-[90vh] overflow-y-auto md:overflow-hidden"
+          className="relative w-full max-w-5xl bg-[#0D0202] border border-white/5 rounded-3xl md:rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col md:flex-row max-h-[90vh] overflow-y-auto md:overflow-hidden"
         >
           {/* Left Panel: Visuals & Preview */}
           <div className="w-full md:w-[40%] bg-white/[0.02] border-b md:border-b-0 md:border-r border-white/5 p-5 md:p-8 flex flex-col shrink-0">
