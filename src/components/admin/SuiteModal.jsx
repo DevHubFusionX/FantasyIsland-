@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Home, DollarSign, List, Camera, Save, Plus, Trash2, Star, Shield, Flame, Clock, Sparkles, Image as ImageIcon } from 'lucide-react'
 
@@ -6,48 +6,23 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
   const isEdit = !!suite
   const fileInputRef = useRef(null)
   const galleryInputRef = useRef(null)
-  const [previewImg, setPreviewImg] = useState(null)
-  const [galleryPreviews, setGalleryPreviews] = useState([])
-  const [activeTab, setActiveTab] = useState('details') // 'details' or 'visuals'
+  // State is initialized directly from props — the parent uses a `key` prop
+  // to force a remount when `suite` changes, so initializers always run fresh.
+  const [previewImg, setPreviewImg] = useState(suite?.img || null)
+  const [galleryPreviews, setGalleryPreviews] = useState(suite?.gallery || [])
+  const [existingGalleryUrls, setExistingGalleryUrls] = useState(suite?.gallery || [])
+  const [activeTab, setActiveTab] = useState('details')
   
   const [formData, setFormData] = useState({
-    title: '',
-    price: '',
-    features: [],
-    icon: 'Shield',
+    title: suite?.title || '',
+    price: suite?.price || '',
+    features: suite?.features || [],
+    icon: suite?.icon || 'Shield',
     img: null,
     gallery: [],
-    maxDays: 7
+    maxDays: suite?.maxDays || 7
   })
   const [newFeature, setNewFeature] = useState('')
-
-  useEffect(() => {
-    if (suite) {
-      setFormData({
-        title: suite.title || '',
-        price: suite.price || '',
-        features: suite.features || [],
-        icon: suite.icon || 'Shield',
-        img: null,
-        gallery: [],
-        maxDays: suite.maxDays || 7
-      })
-      setPreviewImg(suite.img)
-      setGalleryPreviews(suite.gallery || [])
-    } else {
-      setFormData({
-        title: '',
-        price: '',
-        features: [],
-        icon: 'Shield',
-        img: null,
-        gallery: [],
-        maxDays: 7
-      })
-      setPreviewImg(null)
-      setGalleryPreviews([])
-    }
-  }, [suite, isOpen])
 
   if (!isOpen) return null
 
@@ -62,10 +37,13 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
   const handleGalleryChange = (e) => {
     const files = Array.from(e.target.files)
     if (files.length > 0) {
-      setFormData({ ...formData, gallery: files })
-      const previews = files.map(file => URL.createObjectURL(file))
-      setGalleryPreviews(previews)
+      // Append new files to existing ones
+      setFormData(prev => ({ ...prev, gallery: [...prev.gallery, ...files] }))
+      const newPreviews = files.map(file => URL.createObjectURL(file))
+      setGalleryPreviews(prev => [...prev, ...newPreviews])
     }
+    // Reset the input so the same file can be selected again
+    e.target.value = ''
   }
 
   const addFeature = () => {
@@ -97,6 +75,9 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
         data.append('gallery', file)
       })
     }
+
+    // Send existing gallery URLs that should be kept
+    data.append('existingGallery', JSON.stringify(existingGalleryUrls))
     
     onSave(suite?._id, data)
   }
@@ -159,25 +140,36 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
                   <button onClick={() => galleryInputRef.current.click()} className="text-[9px] uppercase tracking-widest font-bold text-sensual-red hover:text-white transition-colors">Add More</button>
                </div>
                <div className="grid grid-cols-4 gap-2">
-                 {Array.from({ length: 4 }).map((_, i) => (
+                 {galleryPreviews.map((preview, i) => (
                    <div key={i} className="aspect-square rounded-xl bg-white/5 border border-white/5 overflow-hidden relative group/gal cursor-pointer">
-                     {galleryPreviews[i] ? (
-                       <>
-                        <img src={galleryPreviews[i]} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/gal:opacity-100 transition-opacity flex items-center justify-center">
-                          <Trash2 size={12} className="text-white" onClick={(e) => {
-                            e.stopPropagation();
-                            setGalleryPreviews(prev => prev.filter((_, idx) => idx !== i));
-                          }} />
-                        </div>
-                       </>
-                     ) : (
-                       <div className="absolute inset-0 flex items-center justify-center text-white/10 hover:text-sensual-red/40" onClick={() => galleryInputRef.current.click()}>
-                         <Plus size={16} />
-                       </div>
-                     )}
+                     <img src={preview} className="w-full h-full object-cover" />
+                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/gal:opacity-100 transition-opacity flex items-center justify-center">
+                       <Trash2 size={12} className="text-white" onClick={(e) => {
+                         e.stopPropagation();
+                         const removedPreview = galleryPreviews[i];
+                         // Remove from previews
+                         setGalleryPreviews(prev => prev.filter((_, idx) => idx !== i));
+                         // Check if it's an existing server URL or a new file blob
+                         if (existingGalleryUrls.includes(removedPreview)) {
+                           setExistingGalleryUrls(prev => prev.filter(url => url !== removedPreview));
+                         } else {
+                           // It's a new file - find its index in formData.gallery
+                           const existingCount = existingGalleryUrls.filter(url => galleryPreviews.slice(0, i).includes(url)).length;
+                           const newFileIndex = i - existingCount;
+                           setFormData(prev => ({ ...prev, gallery: prev.gallery.filter((_, idx) => idx !== newFileIndex) }));
+                         }
+                       }} />
+                     </div>
                    </div>
                  ))}
+                 {/* Add more button slot */}
+                 {galleryPreviews.length < 6 && (
+                   <div className="aspect-square rounded-xl bg-white/5 border border-white/5 overflow-hidden relative cursor-pointer" onClick={() => galleryInputRef.current.click()}>
+                     <div className="absolute inset-0 flex items-center justify-center text-white/10 hover:text-sensual-red/40">
+                       <Plus size={16} />
+                     </div>
+                   </div>
+                 )}
                </div>
             </div>
             <input type="file" ref={fileInputRef} hidden onChange={handleFileChange} accept="image/*" />

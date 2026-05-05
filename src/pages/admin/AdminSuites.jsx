@@ -200,6 +200,7 @@ const AdminSuites = () => {
       )}
 
       <SuiteModal 
+        key={selectedSuite?._id || 'new'}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         suite={selectedSuite}
