@@ -682,7 +682,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                       </button>
                     )}
                     <button 
-                        onClick={step === 4 ? handleConfirmBooking : handleNext}
+                        onClick={step === 4 ? () => handleConfirmBooking() : handleNext}
                         disabled={isSubmitting}
                         className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
