@@ -131,7 +131,9 @@ const Navbar = () => {
 
         {/* Mobile Toggle */}
         <button 
-          className="md:hidden pointer-events-auto w-11 h-11 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white transition-all active:scale-90"
+          className={`md:hidden pointer-events-auto w-11 h-11 border rounded-full flex items-center justify-center text-white transition-all active:scale-90 ${
+            isScrolled ? 'bg-[#0D0202] border-white/10' : 'bg-white/5 border-white/10'
+          }`}
           onClick={() => setIsMobileMenuOpen(true)}
         >
           <Menu size={20} />
