@@ -29,7 +29,7 @@ const AdminSuites = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['suites'])
+      queryClient.invalidateQueries({ queryKey: ['suites'] })
       setIsModalOpen(false)
       setSelectedSuite(null)
       toast.success('Suite created successfully')
@@ -45,7 +45,7 @@ const AdminSuites = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['suites'])
+      queryClient.invalidateQueries({ queryKey: ['suites'] })
       setIsModalOpen(false)
       setSelectedSuite(null)
       toast.success('Suite updated successfully')
@@ -61,7 +61,7 @@ const AdminSuites = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['suites'])
+      queryClient.invalidateQueries({ queryKey: ['suites'] })
       toast.success('Suite removed from inventory')
     },
     onError: (err) => {

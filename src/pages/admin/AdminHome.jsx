@@ -12,7 +12,8 @@ const AdminHome = () => {
     queryFn: async () => {
       const response = await apiClient.get(API.bookings)
       return response.data.data
-    }
+    },
+    retry: 1
   })
 
   if (isLoading) {

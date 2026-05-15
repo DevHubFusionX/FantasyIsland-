@@ -29,7 +29,7 @@ const AdminSettings = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['settings'])
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
       toast.success('System configurations updated')
     },
     onError: (err) => {
@@ -82,7 +82,7 @@ const AdminSettings = () => {
           <p className="text-white/30 uppercase tracking-[0.3em] text-[10px] font-bold">Global Application Parameters</p>
         </div>
         <button 
-          onClick={() => queryClient.invalidateQueries(['settings'])}
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['settings'] })}}
           className="p-4 rounded-2xl bg-white/5 text-white/40 hover:text-white transition-all"
         >
           <RefreshCw size={20} />

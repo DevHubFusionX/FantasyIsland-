@@ -18,7 +18,7 @@ const ManageBooking = () => {
     queryFn: async () => {
       const response = await fetch(`${API.bookings}/${searchId}`)
       const data = await response.json()
-      if (!data.success) throw new Error('Booking not found')
+      if (!data.success) throw new Error(data.message || 'Booking not found')
       setLocalBooking(data.data)
       return data.data
     },
@@ -57,6 +57,7 @@ const ManageBooking = () => {
     },
     onSuccess: () => {
       toast.success('Reservation cancelled')
+      queryClient.removeQueries({ queryKey: ['booking', searchId] })
       setSearchId(null)
       setLocalBooking(null)
       setBookingId('')
@@ -98,7 +99,7 @@ const ManageBooking = () => {
           <p className="text-white/40 uppercase tracking-widest text-xs">Access and modify your existing booking details</p>
         </motion.div>
 
-        {!booking ? (
+        {!booking && !error ? (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -124,6 +125,20 @@ const ManageBooking = () => {
                 {loading ? 'Searching...' : 'Find Reservation'}
               </button>
             </form>
+          </motion.div>
+        ) : error ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 text-center space-y-6"
+          >
+            <p className="text-sensual-red font-bold uppercase tracking-widest text-sm">{error.message}</p>
+            <button
+              onClick={() => { setSearchId(null); setBookingId('') }}
+              className="py-4 px-8 bg-white/5 border border-white/10 rounded-2xl text-white/60 font-bold uppercase tracking-widest hover:bg-white/10 transition-all text-xs"
+            >
+              Try Again
+            </button>
           </motion.div>
         ) : (
           <motion.div 

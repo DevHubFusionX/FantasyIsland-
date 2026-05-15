@@ -27,7 +27,7 @@ const AdminTiers = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['tiers'])
+      queryClient.invalidateQueries({ queryKey: ['tiers'] })
       setIsModalOpen(false)
       setSelectedTier(null)
       toast.success('Tier created successfully')
@@ -43,7 +43,7 @@ const AdminTiers = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['tiers'])
+      queryClient.invalidateQueries({ queryKey: ['tiers'] })
       setIsModalOpen(false)
       setSelectedTier(null)
       toast.success('Tier updated successfully')
@@ -59,7 +59,7 @@ const AdminTiers = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['tiers'])
+      queryClient.invalidateQueries({ queryKey: ['tiers'] })
       toast.success('Tier deleted')
     },
     onError: (err) => {

@@ -27,7 +27,7 @@ const AdminBookings = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['bookings'])
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
       setIsModalOpen(false)
       setSelectedBooking(null)
       toast.success('Reservation recorded successfully')
@@ -43,7 +43,7 @@ const AdminBookings = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['bookings'])
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
       setIsModalOpen(false)
       setSelectedBooking(null)
       toast.success('Reservation updated')
@@ -59,7 +59,7 @@ const AdminBookings = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['bookings'])
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
       toast.success('Reservation deleted')
     },
     onError: (err) => {

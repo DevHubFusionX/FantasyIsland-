@@ -58,6 +58,19 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   })
   const settings = settingsData || null
 
+  // Auto-select first available payment method when settings load
+  useEffect(() => {
+    if (!settings) return
+    const available = [
+      { id: 'Bank Transfer', enabled: !!(settings.bank_name || settings.account_number) },
+      { id: 'PayPal', enabled: !!(settings.paypal_client_id && settings.paypal_client_id !== 'sb') },
+      { id: 'Bitcoin', enabled: !!(settings.bitcoin_address) }
+    ].filter(m => m.enabled)
+    if (available.length > 0 && !available.find(m => m.id === formData.paymentMethod)) {
+      setFormData(prev => ({ ...prev, paymentMethod: available[0].id }))
+    }
+  }, [settings])
+
   const bookingMutation = useMutation({
     mutationFn: async (bookingData) => {
       const response = await fetch(API.bookings, {
@@ -97,6 +110,11 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   }
 
   const handleNext = () => {
+    if (step === 2) {
+      if (!formData.name.trim()) { toast.error('Please enter your name'); return }
+      if (!formData.email.trim()) { toast.error('Please enter your email'); return }
+      if (!formData.phone.trim()) { toast.error('Please enter your phone number'); return }
+    }
     if (step === 3 && !formData.date) {
       toast.error('Please select a check-in date.')
       return
