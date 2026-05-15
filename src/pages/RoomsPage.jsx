@@ -8,7 +8,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import CheckoutDrawer from '../components/CheckoutDrawer'
 
-const RoomCard = React.memo(({ title, price, img, features, icon: Icon, delay, onReserve }) => (
+const RoomCard = React.memo(({ title, price, img, features, icon: Icon, delay, onReserve, durationType }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
@@ -23,7 +23,7 @@ const RoomCard = React.memo(({ title, price, img, features, icon: Icon, delay, o
       />
       <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent" />
       <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-sensual-red text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest red-shadow">
-        ${price} / Night
+        ${price} / {durationType || 'Night'}
       </div>
     </div>
     

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Calendar, User, Phone, Mail, Clock, Save, Trash2, CheckCircle2 } from 'lucide-react'
+import { Search, Calendar, User, Phone, Mail, Clock, Save, Trash2, CheckCircle2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { API } from '../config/api'
@@ -28,10 +28,11 @@ const ManageBooking = () => {
 
   const updateMutation = useMutation({
     mutationFn: async (updatedData) => {
-      const response = await fetch(`${API.bookings}/${updatedData._id}`, {
+      const { _id, __v, createdAt, updatedAt, ...fields } = updatedData
+      const response = await fetch(`${API.bookings}/${_id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedData)
+        body: JSON.stringify(fields)
       })
       const data = await response.json()
       if (!data.success) throw new Error(data.message)

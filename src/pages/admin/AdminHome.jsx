@@ -4,14 +4,14 @@ import AdminStats from '../../components/admin/AdminStats'
 import { Loader2, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { API } from '../../config/api'
+import apiClient from '../../config/apiClient'
 
 const AdminHome = () => {
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error } = useQuery({
     queryKey: ['bookings'],
     queryFn: async () => {
-      const response = await fetch(API.bookings)
-      const data = await response.json()
-      return data.data
+      const response = await apiClient.get(API.bookings)
+      return response.data.data
     }
   })
 
@@ -20,6 +20,14 @@ const AdminHome = () => {
       <div className="flex flex-col items-center justify-center py-40">
         <Loader2 className="text-sensual-red animate-spin mb-4" size={48} />
         <p className="text-white/20 uppercase tracking-widest text-xs">Loading Dashboard...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-40">
+        <p className="text-red-500 text-xs uppercase tracking-widest font-bold">Failed to load dashboard data</p>
       </div>
     )
   }

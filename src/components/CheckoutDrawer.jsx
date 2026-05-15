@@ -4,7 +4,6 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download, Maximize2 } from 'lucide-react'
 import { API, formatImageUrl } from '../config/api'
-import { PayPalButtons } from "@paypal/react-paypal-js"
 import logoLady from '../assets/logo-lady.png'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
@@ -22,6 +21,15 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     duration: '1',
     paymentMethod: 'Bank Transfer'
   })
+
+  // Reset step when drawer closes
+  useEffect(() => {
+    if (!isOpen) {
+      setStep(1)
+      setBookingResult(null)
+      setActiveImg(0)
+    }
+  }, [isOpen])
 
   // Handle pre-filled data from Hero
   useEffect(() => {
@@ -71,7 +79,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     }
   })
 
-  const handleConfirmBooking = () => {
+  const handleConfirmBooking = (transactionId = null) => {
     const bookingData = {
       guestName: formData.name,
       email: formData.email,
@@ -82,7 +90,8 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
       duration: parseInt(formData.duration),
       totalAmount: (room.price * parseInt(formData.duration)) + 50,
       paymentMethod: formData.paymentMethod,
-      paymentStatus: formData.paymentMethod === 'PayPal' ? 'Completed' : 'Pending'
+      paymentStatus: transactionId ? 'Completed' : 'Pending',
+      ...(transactionId && { transactionId })
     }
     bookingMutation.mutate(bookingData)
   }
@@ -386,7 +395,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           </AnimatePresence>
 
                           <h3 className="text-2xl md:text-3xl font-display mb-2 md:mb-4">{room.title}</h3>
-                          <div className="text-xl md:text-2xl font-bold text-sensual-red mb-4 md:mb-6">${room.price} <span className="text-white/20 text-[10px] md:text-sm font-light uppercase tracking-widest">/ Night</span></div>
+                          <div className="text-xl md:text-2xl font-bold text-sensual-red mb-4 md:mb-6">${room.price} <span className="text-white/20 text-[10px] md:text-sm font-light uppercase tracking-widest">/ {room.durationType || 'Night'}</span></div>
                           <p className="text-white/50 text-[11px] md:text-sm leading-relaxed mb-6 md:mb-8">
                             Experience absolute privacy in our most sought-after obsidian finished sanctuary. 
                             Includes all standard luxury amenities and personal concierge support.
@@ -477,9 +486,12 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                 value={formData.duration}
                                 onChange={(e) => setFormData({...formData, duration: e.target.value})}
                               >
-                                {Array.from({ length: room.maxDays || 7 }, (_, i) => i + 1).map(n => (
-                                  <option key={n} value={n} className="bg-obsidian">{n} Night{n > 1 ? 's' : ''}</option>
-                                ))}
+                                {Array.from({ length: room.maxDays || 7 }, (_, i) => i + 1).map(n => {
+                                  const unit = room.durationType || 'Night'
+                                  return (
+                                    <option key={n} value={n} className="bg-obsidian">{n} {unit}{n > 1 ? 's' : ''}</option>
+                                  )
+                                })}
                               </select>
                             </div>
                           </div>
@@ -512,10 +524,10 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           <h3 className="text-2xl font-display mb-8">Payment Method</h3>
                           <div className="space-y-4 mb-10">
                             {[
-                              { id: 'Bank Transfer', icon: Landmark, desc: 'Direct secure transfer' },
-                              { id: 'PayPal', icon: Send, desc: 'Fast digital checkout' },
-                              { id: 'Bitcoin', icon: Bitcoin, desc: 'Request for tags' }
-                            ].map((m) => (
+                              { id: 'Bank Transfer', icon: Landmark, desc: 'Direct secure transfer', enabled: !!(settings?.bank_name || settings?.account_number) },
+                              { id: 'PayPal', icon: Send, desc: 'Fast digital checkout', enabled: !!(settings?.paypal_client_id && settings.paypal_client_id !== 'sb') },
+                              { id: 'Bitcoin', icon: Bitcoin, desc: 'Crypto payment', enabled: !!(settings?.bitcoin_address) }
+                            ].filter(m => m.enabled).map((m) => (
                               <button
                                 key={m.id}
                                 onClick={() => setFormData({ ...formData, paymentMethod: m.id })}
@@ -550,23 +562,23 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="p-6 rounded-3xl bg-white/5 border border-white/10"
+                                className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-4"
                               >
-                                <PayPalButtons 
-                                  style={{ layout: "vertical", color: "blue", shape: "pill", label: "pay" }}
-                                  createOrder={(data, actions) => {
-                                    return actions.order.create({
-                                      purchase_units: [{
-                                        amount: { value: ((room.price * formData.duration) + 50).toString() }
-                                      }]
-                                    });
-                                  }}
-                                  onApprove={(data, actions) => {
-                                    return actions.order.capture().then(() => {
-                                      handleConfirmBooking();
-                                    });
-                                  }}
-                                />
+                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                  <div>
+                                    <span className="text-[8px] text-white/20 uppercase tracking-widest block">PayPal Client ID</span>
+                                    <span className="text-sm font-mono tracking-tighter truncate block max-w-[220px]">{settings?.paypal_client_id || '—'}</span>
+                                  </div>
+                                  <button 
+                                    onClick={() => navigator.clipboard.writeText(settings?.paypal_client_id || '')}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-sensual-red"
+                                  >
+                                    <Copy size={16} />
+                                  </button>
+                                </div>
+                                <p className="text-[10px] text-white/30 uppercase tracking-widest text-center">
+                                  Send payment via PayPal using the client ID above
+                                </p>
                               </motion.div>
                             )}
 
@@ -622,7 +634,10 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                     <Copy size={14} />
                                   </button>
                                 </div>
-                                <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-white/10 transition-all">
+                                <button 
+                                  onClick={() => window.open(`https://blockchair.com/bitcoin/address/${settings?.bitcoin_address || ''}`, '_blank')}
+                                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-white/10 transition-all"
+                                >
                                   <span>Verify Transaction</span>
                                   <ExternalLink size={14} />
                                 </button>
@@ -648,8 +663,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                         Back
                       </button>
                     )}
-                    {step !== 4 || formData.paymentMethod !== 'PayPal' ? (
-                      <button 
+                    <button 
                         onClick={step === 4 ? handleConfirmBooking : handleNext}
                         disabled={isSubmitting}
                         className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -657,7 +671,6 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                         <span>{isSubmitting ? 'Processing...' : (step === 4 ? 'Confirm Booking' : 'Continue')}</span>
                         {!isSubmitting && <ChevronRight size={18} />}
                       </button>
-                    ) : null}
                   </div>
                 </>
               )}

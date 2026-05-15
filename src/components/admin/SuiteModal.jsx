@@ -22,7 +22,8 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
     icon: suite?.icon || 'Shield',
     img: null,
     gallery: [],
-    maxDays: suite?.maxDays || 7
+    maxDays: suite?.maxDays || 7,
+    durationType: suite?.durationType || 'Night'
   })
   const [newFeature, setNewFeature] = useState('')
 
@@ -68,6 +69,7 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
     data.append('price', formData.price)
     data.append('icon', formData.icon)
     data.append('maxDays', formData.maxDays)
+    data.append('durationType', formData.durationType)
     data.append('features', JSON.stringify(formData.features))
     
     if (formData.img) {
@@ -233,6 +235,40 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
                           onChange={(e) => setFormData({...formData, price: e.target.value})}
                           placeholder="Rate per Cycle"
                         />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[9px] uppercase tracking-widest font-bold text-white/30 px-1">Max Stay ({formData.durationType}s)</label>
+                      <div className="relative group">
+                        <Clock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-sensual-red transition-colors" size={16} />
+                        <input 
+                          type="number" 
+                          min="1"
+                          required
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-xs text-white placeholder:text-white/10"
+                          value={formData.maxDays}
+                          onChange={(e) => setFormData({...formData, maxDays: e.target.value})}
+                          placeholder="7"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[9px] uppercase tracking-widest font-bold text-white/30 px-1">Duration Type</label>
+                      <div className="flex rounded-2xl overflow-hidden border border-white/5">
+                        {['Night', 'Day'].map(type => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => setFormData({...formData, durationType: type})}
+                            className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-all ${
+                              formData.durationType === type
+                                ? 'bg-sensual-red text-white'
+                                : 'bg-white/5 text-white/30 hover:text-white/60'
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>

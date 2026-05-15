@@ -186,7 +186,7 @@ const AdminSuites = () => {
                         <div className="flex items-center text-sensual-red space-x-1">
                           <DollarSign size={14} />
                           <span className="text-lg md:text-xl font-bold">{suite.price}</span>
-                          <span className="text-[9px] text-white/20 uppercase tracking-widest font-bold ml-1">/ Night</span>
+                          <span className="text-[9px] text-white/20 uppercase tracking-widest font-bold ml-1">/ {suite.durationType || 'Night'}</span>
                         </div>
                       </div>
                     </div>

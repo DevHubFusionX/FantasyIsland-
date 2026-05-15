@@ -44,7 +44,7 @@ const BookingRow = ({ booking, onStatusUpdate, onDelete, onEdit }) => {
           <option value="Pending">Pending</option>
           <option value="Confirmed">Confirmed</option>
           <option value="Cancelled">Cancelled</option>
-          <option value="Stayed">Stayed</option>
+          <option value="Completed">Completed</option>
         </select>
       </td>
       <td className="px-8 py-6 text-right">

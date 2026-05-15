@@ -1,109 +1,61 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, MapPin, User, Mail, Calendar, CheckCircle, Loader2, ChevronDown } from 'lucide-react'
-import { useMutation } from '@tanstack/react-query'
-import { toast } from 'react-hot-toast'
+import { ArrowRight, MapPin, User, Mail, Calendar, ChevronDown } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { useLocation } from '../hooks/useLocation'
 import { API } from '../config/api'
 
 const Hero = () => {
   const { location } = useLocation()
   const navigate = useNavigate()
-  const [formState, setFormState] = useState('idle') // idle, submitting, success
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    room: 'The Velvet Lounge',
+    room: '',
     date: '',
     duration: '1'
   })
 
-  const roomConfig = {
-    'The Velvet Lounge': { price: 580, minDays: 1, maxDays: 7 },
-    'Crimson VIP Suite': { price: 1000, minDays: 2, maxDays: 14 },
-    'Royal Obsidian': { price: 1500, minDays: 3, maxDays: 30 }
-  }
-
-  const handleRoomChange = (e) => {
-    const newRoom = e.target.value
-    const config = roomConfig[newRoom]
-    const currentDur = parseInt(formData.duration)
-    
-    let adjustedDuration = formData.duration
-    if (currentDur < config.minDays) {
-      adjustedDuration = config.minDays.toString()
-    } else if (currentDur > config.maxDays) {
-      adjustedDuration = config.maxDays.toString()
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      room: newRoom,
-      duration: adjustedDuration
-    }))
-  }
-
-  const bookingMutation = useMutation({
-    mutationFn: async (bookingData) => {
-      const response = await fetch(API.bookings, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData)
-      })
-      const data = await response.json()
-      if (!data.success) throw new Error(data.message)
-      return data.data
-    },
-    onSuccess: (data) => {
-      // Redirect to rooms page with pre-filled data to start the booking flow
-      navigate('/rooms', { 
-        state: { 
-          prefill: {
-            name: formData.name,
-            email: formData.email,
-            room: formData.room,
-            date: formData.date,
-            duration: formData.duration
-          } 
-        } 
-      })
-      toast.success('Availability confirmed')
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to check availability')
+  const { data: suites = [] } = useQuery({
+    queryKey: ['suites'],
+    queryFn: async () => {
+      const res = await fetch(API.suites)
+      const data = await res.json()
+      return data.data || []
     }
   })
 
+  const selectedSuite = suites.find(s => s.title === formData.room) || suites[0]
+
+  const handleRoomChange = (e) => {
+    const suite = suites.find(s => s.title === e.target.value)
+    const maxDays = suite?.maxDays || 7
+    const currentDur = parseInt(formData.duration)
+    setFormData(prev => ({
+      ...prev,
+      room: e.target.value,
+      duration: currentDur > maxDays ? maxDays.toString() : prev.duration
+    }))
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    const config = roomConfig[formData.room]
-    const duration = parseInt(formData.duration)
-    const bookingData = {
-      guestName: formData.name,
-      email: formData.email,
-      phone: 'N/A',
-      suiteTitle: formData.room,
-      suitePrice: config.price,
-      checkInDate: formData.date,
-      duration: duration,
-      totalAmount: (config.price * duration) + 50,
-      paymentMethod: 'Bank Transfer',
-      paymentStatus: 'Pending'
-    }
-    bookingMutation.mutate(bookingData)
+    navigate('/rooms', {
+      state: {
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          room: formData.room || selectedSuite?.title,
+          date: formData.date,
+          duration: formData.duration
+        }
+      }
+    })
   }
 
-  const isSubmitting = bookingMutation.isPending
-
-  const renderDurationOptions = () => {
-    const config = roomConfig[formData.room]
-    const options = []
-    for (let i = config.minDays; i <= config.maxDays; i++) {
-      options.push(<option key={i} value={i} className="bg-obsidian">{i} {i === 1 ? 'Day' : 'Days'}</option>)
-    }
-    return options
-  }
+  const maxDays = selectedSuite?.maxDays || 7
+  const roomTitle = formData.room || selectedSuite?.title || ''
 
   return (
     <section id="hero" className="relative min-h-screen w-full flex items-center overflow-hidden bg-obsidian pt-32 pb-20 lg:py-0">
@@ -160,133 +112,93 @@ const Hero = () => {
             transition={{ duration: 1, delay: 0.3 }}
             className="w-full lg:max-w-none glass-premium p-6 md:p-10 rounded-3xl lg:rounded-[2.5rem] border border-white/5 lg:border-white/5 relative overflow-hidden max-h-[85vh] overflow-y-auto custom-scrollbar text-center lg:text-left"
           >
-            <AnimatePresence mode="wait">
-              {formState === 'success' ? (
-                <motion.div 
-                  key="success"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-8"
-                >
-                  <div className="w-16 h-16 bg-sensual-red rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg shadow-sensual-red/20">
-                    <CheckCircle className="text-white w-8 h-8" />
+            <div>
+              <div className="mb-8">
+                <h3 className="text-2xl md:text-3xl font-display text-white mb-2">Book Your <span className="text-sensual-red">Stay</span></h3>
+                <p className="text-white/30 text-[10px] uppercase tracking-[0.3em]">Select a room and check in</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <User className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-sensual-red transition-colors" size={16} />
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="Your Name"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/10 transition-all text-[13px] text-white"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    />
                   </div>
-                  <h3 className="text-2xl font-display text-white mb-2">Booking Sent</h3>
-                  <p className="text-white/40 text-[10px] uppercase tracking-widest mb-8">Ref: {formData._id?.slice(-8)}</p>
-                  
-                  <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-8 text-left space-y-4">
-                    <div className="flex justify-between text-[10px] uppercase tracking-widest text-white/40">
-                      <span>Room</span>
-                      <span className="text-white font-bold">{formData.room}</span>
-                    </div>
-                    <div className="flex justify-between text-[10px] uppercase tracking-widest text-white/40">
-                      <span>Stay</span>
-                      <span className="text-white font-bold">{formData.duration} {formData.duration === '1' ? 'Day' : 'Days'}</span>
-                    </div>
-                    <div className="flex justify-between text-[10px] uppercase tracking-widest text-white/40">
-                      <span>Date</span>
-                      <span className="text-white font-bold">{formData.date}</span>
-                    </div>
+                  <div className="relative group">
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-sensual-red transition-colors" size={16} />
+                    <input 
+                      required
+                      type="email" 
+                      placeholder="Email Address"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/10 transition-all text-[13px] text-white"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    />
                   </div>
-
-                  <button 
-                    onClick={() => setFormState('idle')}
-                    className="w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-widest text-[10px] transition-all"
-                  >
-                    Book Another Room
-                  </button>
-                </motion.div>
-              ) : (
-                <div key="form">
-                  <div className="mb-8">
-                    <h3 className="text-2xl md:text-3xl font-display text-white mb-2">Book Your <span className="text-sensual-red">Stay</span></h3>
-                    <p className="text-white/30 text-[10px] uppercase tracking-[0.3em]">Check if the room is ready</p>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="space-y-4">
-                      <div className="relative group">
-                        <User className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-sensual-red transition-colors" size={16} />
-                        <input 
-                          required
-                          type="text" 
-                          placeholder="Your Name"
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/10 transition-all text-[13px] text-white"
-                          value={formData.name}
-                          onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        />
-                      </div>
-                      <div className="relative group">
-                        <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-sensual-red transition-colors" size={16} />
-                        <input 
-                          required
-                          type="email" 
-                          placeholder="Email Address"
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/10 transition-all text-[13px] text-white"
-                          value={formData.email}
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="relative">
-                        <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={14} />
-                        <select 
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 appearance-none"
-                          value={formData.room}
-                          onChange={handleRoomChange}
-                        >
-                          <option value="The Velvet Lounge" className="bg-obsidian">Velvet Lounge</option>
-                          <option value="Crimson VIP Suite" className="bg-obsidian">VIP Suite</option>
-                          <option value="Royal Obsidian" className="bg-obsidian">Royal Obsidian</option>
-                        </select>
-                      </div>
-                      <div className="relative group">
-                        <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-sensual-red transition-colors" size={14} />
-                        <input 
-                          required
-                          type="date" 
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 [color-scheme:dark]"
-                          value={formData.date}
-                          onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="relative">
-                      <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={14} />
-                      <select 
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 appearance-none"
-                        value={formData.duration}
-                        onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                      >
-                        {renderDurationOptions()}
-                      </select>
-                    </div>
-
-                    <button 
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-sensual-red/90 hover:bg-sensual-red text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-sensual-red/20 flex items-center justify-center space-x-3 disabled:opacity-50 text-[11px]"
-                    >
-                      {isSubmitting ? (
-                        <Loader2 className="animate-spin" size={18} />
-                      ) : (
-                        <>
-                          <span>Check Availability</span>
-                          <ArrowRight size={16} />
-                        </>
-                      )}
-                    </button>
-                    
-                    <p className="text-center text-[9px] text-white/20 uppercase tracking-[0.4em]">
-                      Your Data is Safe
-                    </p>
-                  </form>
                 </div>
-              )}
-            </AnimatePresence>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={14} />
+                    <select 
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 appearance-none"
+                      value={roomTitle}
+                      onChange={handleRoomChange}
+                    >
+                      {suites.map(s => (
+                        <option key={s._id} value={s.title} className="bg-obsidian">{s.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="relative group">
+                    <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-sensual-red transition-colors" size={14} />
+                    <input 
+                      required
+                      type="date" 
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 [color-scheme:dark]"
+                      value={formData.date}
+                      onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={14} />
+                  <select 
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 appearance-none"
+                    value={formData.duration}
+                    onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                  >
+                    {Array.from({ length: maxDays }, (_, i) => i + 1).map(n => {
+                      const unit = selectedSuite?.durationType || 'Night'
+                      return (
+                        <option key={n} value={n} className="bg-obsidian">{n} {unit}{n > 1 ? 's' : ''}</option>
+                      )
+                    })}
+                  </select>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full bg-sensual-red/90 hover:bg-sensual-red text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-sensual-red/20 flex items-center justify-center space-x-3 text-[11px]"
+                >
+                  <span>Check Availability</span>
+                  <ArrowRight size={16} />
+                </button>
+                
+                <p className="text-center text-[9px] text-white/20 uppercase tracking-[0.4em]">
+                  Your Data is Safe
+                </p>
+              </form>
+            </div>
           </motion.div>
         </div>
       </div>

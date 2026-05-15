@@ -1,12 +1,20 @@
 import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Calendar, Camera, Settings, LogOut, Menu, X, Home as HomeIcon, ChevronRight, ChevronLeft, PanelLeftClose, PanelLeft, Award } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '../../context/AuthContext'
 import logoLady from '../../assets/logo-lady.png'
 
 const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { logout } = useAuth()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+  const handleLogout = () => {
+    logout()
+    navigate('/admin/login')
+  }
   
   const menuItems = [
     { name: 'Reservations', icon: Calendar, path: '/admin/bookings' },
@@ -100,16 +108,16 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
       </div>
 
       <div className={`mt-auto p-6 ${isCollapsed && !isMobile ? 'px-4' : 'md:p-8'} border-t border-white/5`}>
-        <Link 
-          to="/" 
-          className={`flex items-center ${isCollapsed && !isMobile ? 'justify-center' : 'space-x-4'} px-5 md:px-6 py-3.5 md:py-5 rounded-xl md:rounded-2xl text-white/30 hover:bg-rose-500/5 hover:text-rose-500 transition-all group border border-transparent hover:border-rose-500/10`}
-          title={isCollapsed && !isMobile ? 'Terminate Session' : ''}
+        <button
+          onClick={handleLogout}
+          className={`flex items-center ${isCollapsed && !isMobile ? 'justify-center' : 'space-x-4'} w-full px-5 md:px-6 py-3.5 md:py-5 rounded-xl md:rounded-2xl text-white/30 hover:bg-rose-500/5 hover:text-rose-500 transition-all group border border-transparent hover:border-rose-500/10`}
+          title={isCollapsed && !isMobile ? 'Logout' : ''}
         >
-          <LogOut size={18} md:size={20} className="text-white/20 group-hover:text-rose-500 transition-colors shrink-0" />
+          <LogOut size={18} className="text-white/20 group-hover:text-rose-500 transition-colors shrink-0" />
           {(!isCollapsed || isMobile) && (
-            <span className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold">Terminate</span>
+            <span className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold">Logout</span>
           )}
-        </Link>
+        </button>
       </div>
     </div>
   )

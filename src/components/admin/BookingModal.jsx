@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, User, Mail, Calendar, Home, CreditCard, Save, Clock, Hash, Smartphone, DollarSign, Fingerprint } from 'lucide-react'
+import { X, User, Mail, Calendar, Home, CreditCard, Save, Clock, Hash, Smartphone, DollarSign, Fingerprint, Sparkles } from 'lucide-react'
 
 const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
   const isEdit = !!booking
@@ -10,9 +10,11 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
     email: '',
     phone: '',
     suiteTitle: '',
+    suitePrice: '0',
     checkInDate: '',
     duration: '1',
     totalAmount: '0',
+    paymentMethod: 'Bank Transfer',
     bookingStatus: 'Pending',
     paymentStatus: 'Pending'
   })
@@ -24,9 +26,11 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
         email: booking.email || '',
         phone: booking.phone || '',
         suiteTitle: booking.suiteTitle || '',
+        suitePrice: booking.suitePrice || '0',
         checkInDate: booking.checkInDate ? new Date(booking.checkInDate).toISOString().split('T')[0] : '',
         duration: booking.duration || '1',
         totalAmount: booking.totalAmount || '0',
+        paymentMethod: booking.paymentMethod || 'Bank Transfer',
         bookingStatus: booking.bookingStatus || 'Pending',
         paymentStatus: booking.paymentStatus || 'Pending'
       })
@@ -36,9 +40,11 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
         email: '',
         phone: '',
         suiteTitle: '',
+        suitePrice: '0',
         checkInDate: new Date().toISOString().split('T')[0],
         duration: '1',
         totalAmount: '0',
+        paymentMethod: 'Bank Transfer',
         bookingStatus: 'Pending',
         paymentStatus: 'Pending'
       })
@@ -170,10 +176,11 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
                   <Smartphone className="absolute left-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-sensual-red transition-colors" size={18} />
                   <input 
                     type="tel" 
+                    required
                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white placeholder:text-white/10"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    placeholder="Communication Line (Optional)"
+                    placeholder="Phone Number"
                   />
                 </div>
               </div>
@@ -224,7 +231,18 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white"
                       value={formData.totalAmount}
                       onChange={(e) => setFormData({...formData, totalAmount: e.target.value})}
-                      placeholder="Total Transaction"
+                      placeholder="Total Amount"
+                    />
+                  </div>
+                  <div className="relative group">
+                    <DollarSign className="absolute left-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-sensual-red transition-colors" size={18} />
+                    <input 
+                      type="number" 
+                      required
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white"
+                      value={formData.suitePrice}
+                      onChange={(e) => setFormData({...formData, suitePrice: e.target.value})}
+                      placeholder="Suite Price / Night"
                     />
                   </div>
                   <div className="relative group">
@@ -235,8 +253,20 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white"
                       value={formData.duration}
                       onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                      placeholder="Nights"
+                      placeholder="Duration"
                     />
+                  </div>
+                  <div className="relative group">
+                    <CreditCard className="absolute left-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-sensual-red transition-colors" size={18} />
+                    <select
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white appearance-none"
+                      value={formData.paymentMethod}
+                      onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+                    >
+                      <option value="Bank Transfer" className="bg-[#0D0202]">Bank Transfer</option>
+                      <option value="PayPal" className="bg-[#0D0202]">PayPal</option>
+                      <option value="Bitcoin" className="bg-[#0D0202]">Bitcoin</option>
+                    </select>
                   </div>
                 </div>
               </div>

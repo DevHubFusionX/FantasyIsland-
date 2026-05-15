@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { Toaster } from 'react-hot-toast'
 import LandingPage from './pages/LandingPage'
 import RoomsPage from './pages/RoomsPage'
@@ -38,8 +37,7 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <PayPalScriptProvider options={{ "client-id": "test" }}>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
         <Toaster 
           position="top-right"
           toastOptions={{
@@ -98,7 +96,6 @@ function App() {
         </Router>
         </AuthProvider>
       </QueryClientProvider>
-    </PayPalScriptProvider>
   )
 }
 

@@ -95,11 +95,30 @@ const AdminBookings = () => {
     }
   }
 
+  const handleExportCSV = () => {
+    if (!bookings?.length) return
+    const headers = ['ID', 'Guest Name', 'Email', 'Suite', 'Check-In', 'Duration', 'Total', 'Payment Method', 'Payment Status', 'Booking Status', 'Created At']
+    const rows = bookings.map(b => [
+      b._id, b.guestName, b.email, b.suiteTitle,
+      new Date(b.checkInDate).toLocaleDateString(), b.duration,
+      b.totalAmount, b.paymentMethod, b.paymentStatus, b.bookingStatus,
+      new Date(b.createdAt).toLocaleDateString()
+    ])
+    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bookings-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const filteredBookings = bookings?.filter(b => 
     b.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     b.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     b._id.includes(searchTerm)
-  )
+  ) ?? []
 
   return (
     <div>
@@ -110,7 +129,7 @@ const AdminBookings = () => {
         </div>
         
         <div className="flex items-center space-x-4 w-full md:w-auto">
-          <button className="flex-1 md:flex-none py-4 px-6 md:px-8 rounded-2xl bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest font-bold hover:bg-white/10 transition-all flex items-center justify-center space-x-2">
+          <button onClick={handleExportCSV} className="flex-1 md:flex-none py-4 px-6 md:px-8 rounded-2xl bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest font-bold hover:bg-white/10 transition-all flex items-center justify-center space-x-2">
             <Download size={14} />
             <span className="hidden sm:inline">Export CSV</span>
             <span className="sm:hidden">Export</span>
