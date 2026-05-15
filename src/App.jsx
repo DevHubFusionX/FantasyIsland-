@@ -1,7 +1,8 @@
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import API_BASE_URL from './config/api'
 import LandingPage from './pages/LandingPage'
 import RoomsPage from './pages/RoomsPage'
 import ManageBooking from './pages/ManageBooking'
@@ -27,15 +28,21 @@ const AdminFallback = () => (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 2, // 2 minutes before refetch
-      gcTime: 1000 * 60 * 10,   // 10 minutes cache lifetime
-      retry: 2,
+      staleTime: 1000 * 60 * 2,
+      gcTime: 1000 * 60 * 10,
+      retry: 3,
+      retryDelay: 2000,
       refetchOnWindowFocus: false,
     },
   },
 })
 
 function App() {
+  useEffect(() => {
+    // Wake up Render backend on app load (free tier cold start can take ~10-30s)
+    fetch(`${API_BASE_URL}/api/suites`).catch(() => {})
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
         <Toaster 
