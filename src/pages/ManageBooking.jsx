@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Calendar, User, Phone, Mail, Clock, Save, Trash2, CheckCircle2, Loader2 } from 'lucide-react'
+import { Search, Calendar, User, Phone, Mail, Clock, Save, Trash2, CheckCircle2, Loader2, AlertCircle, XCircle, Clock3 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { API } from '../config/api'
@@ -85,6 +85,37 @@ const ManageBooking = () => {
 
   const isUpdating = updateMutation.isPending
 
+  const statusConfig = {
+    Pending: {
+      icon: Clock3,
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/20',
+      label: 'Awaiting Verification',
+      message: 'Your payment is being reviewed. Our team will confirm your reservation shortly.'
+    },
+    Confirmed: {
+      icon: CheckCircle2,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10 border-emerald-500/20',
+      label: 'Reservation Confirmed',
+      message: 'Your payment has been verified and your suite is reserved. We look forward to your arrival.'
+    },
+    Cancelled: {
+      icon: XCircle,
+      color: 'text-red-400',
+      bg: 'bg-red-500/10 border-red-500/20',
+      label: 'Reservation Cancelled',
+      message: 'This reservation has been cancelled. Please contact us if you believe this is an error.'
+    },
+    Completed: {
+      icon: CheckCircle2,
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/10 border-blue-500/20',
+      label: 'Stay Completed',
+      message: 'Thank you for your stay at Fantasy Island. We hope to welcome you again.'
+    }
+  }
+
   return (
     <div className="bg-obsidian min-h-screen text-white font-sans">
       <Navbar />
@@ -148,27 +179,36 @@ const ManageBooking = () => {
           >
             {/* Booking Summary Sidebar */}
             <div className="md:col-span-1 space-y-6">
-              <div className="bg-sensual-red/10 border border-sensual-red/20 rounded-3xl p-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-10 h-10 bg-sensual-red rounded-full flex items-center justify-center text-white">
-                    <CheckCircle2 size={20} />
+              {(() => {
+                const s = statusConfig[localBooking?.bookingStatus] || statusConfig.Pending
+                const Icon = s.icon
+                return (
+                  <div className={`border rounded-3xl p-6 ${s.bg}`}>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Icon size={22} className={s.color} />
+                      <div>
+                        <div className="text-[10px] text-white/30 uppercase tracking-widest">Booking Status</div>
+                        <div className={`font-bold text-sm uppercase tracking-widest ${s.color}`}>{s.label}</div>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">{s.message}</p>
+                    <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-white/30 text-[10px] uppercase tracking-widest">Suite</span>
+                        <span className="text-xs font-bold">{localBooking?.suiteTitle}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-white/30 text-[10px] uppercase tracking-widest">Amount</span>
+                        <span className={`text-xs font-bold ${s.color}`}>${localBooking?.totalAmount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-white/30 text-[10px] uppercase tracking-widest">Payment</span>
+                        <span className="text-xs font-bold">{localBooking?.paymentMethod}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-[10px] text-white/40 uppercase tracking-widest">Status</div>
-                    <div className="font-bold text-sm uppercase tracking-widest">{localBooking?.bookingStatus}</div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-white/40 text-xs uppercase tracking-widest">Suite</span>
-                    <span className="text-sm font-bold">{localBooking?.suiteTitle}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/40 text-xs uppercase tracking-widest">Total Paid</span>
-                    <span className="text-sm font-bold text-sensual-red">${localBooking?.totalAmount}</span>
-                  </div>
-                </div>
-              </div>
+                )
+              })()}
               
               <button 
                 onClick={handleDelete}

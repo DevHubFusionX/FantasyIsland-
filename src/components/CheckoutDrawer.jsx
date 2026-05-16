@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
-import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download, Maximize2 } from 'lucide-react'
+import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download, Maximize2, AlertCircle } from 'lucide-react'
 import { API, formatImageUrl } from '../config/api'
 import logoLady from '../assets/logo-lady.png'
 import jsPDF from 'jspdf'
@@ -86,7 +86,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     onSuccess: (data) => {
       setBookingResult(data)
       setStep(5)
-      toast.success('Reservation confirmed')
+      toast.success('Booking received — awaiting verification')
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to confirm reservation')
@@ -719,77 +719,78 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                 </>
               )}
 
-              {/* Success/Receipt State */}
+              {/* Pending Verification State */}
               {step === 5 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex-grow flex flex-col h-full"
+                  className="flex-grow flex flex-col"
                 >
+                  {/* Status Icon */}
                   <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-sensual-red rounded-full flex items-center justify-center mb-4 mx-auto red-shadow">
-                      <CheckCircle2 className="text-white w-8 h-8" />
+                    <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mb-4 mx-auto">
+                      <AlertCircle className="text-amber-400 w-8 h-8" />
                     </div>
-                    <h2 className="text-3xl font-display">Booking Confirmed</h2>
-                    <p className="text-white/40 text-xs uppercase tracking-widest mt-2">ID: {bookingResult?._id || 'FI-TEMP'}</p>
+                    <h2 className="text-3xl font-display">Booking <span className="text-amber-400">Received</span></h2>
+                    <p className="text-white/40 text-xs uppercase tracking-widest mt-2">Awaiting payment verification</p>
                   </div>
 
-                  {/* Receipt Card */}
-                  <div ref={receiptRef} className="bg-white text-obsidian p-8 rounded-3xl relative overflow-hidden shadow-2xl">
-                    {/* Decorative Cutouts */}
-                    <div className="absolute top-1/2 -left-3 w-6 h-6 bg-obsidian rounded-full -translate-y-1/2" />
-                    <div className="absolute top-1/2 -right-3 w-6 h-6 bg-obsidian rounded-full -translate-y-1/2" />
-                    <div className="absolute top-1/2 left-6 right-6 border-t border-dashed border-obsidian/10 -translate-y-1/2" />
+                  {/* Info Banner */}
+                  <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 mb-6">
+                    <p className="text-amber-400/80 text-[11px] uppercase tracking-widest leading-relaxed text-center">
+                      Your booking request has been received. Once our team verifies your payment, your reservation will be confirmed.
+                    </p>
+                  </div>
 
-                    <div className="flex justify-between items-start mb-8">
-                      <div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-obsidian/40 mb-1">Guest</div>
-                        <div className="font-bold text-lg">{formData.name}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-obsidian/40 mb-1">Date</div>
-                        <div className="font-bold text-sm">{formData.date}</div>
-                      </div>
+                  {/* Booking Summary */}
+                  <div ref={receiptRef} className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4 mb-6">
+                    <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Booking ID</span>
+                      <span className="text-xs font-mono text-white/60">{bookingResult?._id}</span>
                     </div>
-
-                    <div className="mb-12">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-obsidian/40 mb-2">Reservation Details</div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm">{room.title}</span>
-                        <span className="font-bold">${room.price} x {formData.duration}</span>
-                      </div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm">Service Fee</span>
-                        <span className="font-bold">$50</span>
-                      </div>
-                      <div className="flex justify-between items-center text-sensual-red">
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Method</span>
-                        <span className="font-bold text-xs uppercase tracking-widest">{formData.paymentMethod}</span>
-                      </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Guest</span>
+                      <span className="text-sm font-bold">{formData.name}</span>
                     </div>
-
-                    <div className="pt-8">
-                      <div className="flex justify-between items-center">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-obsidian/40">Total Paid</div>
-                        <div className="text-3xl font-display font-bold text-sensual-red">${(room.price * formData.duration) + 50}</div>
-                      </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Suite</span>
+                      <span className="text-sm font-bold">{room?.title}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Check-in</span>
+                      <span className="text-sm font-bold">{formData.date}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Duration</span>
+                      <span className="text-sm font-bold">{formData.duration} Night{formData.duration > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Payment</span>
+                      <span className="text-sm font-bold">{formData.paymentMethod}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Total</span>
+                      <span className="text-xl font-bold text-sensual-red">${(room?.price * parseInt(formData.duration)) + 50}</span>
                     </div>
                   </div>
 
-                  <div className="mt-10 space-y-4">
-                    <button 
-                      onClick={handleDownloadReceipt}
-                      disabled={isDownloading}
-                      className="w-full py-4 rounded-2xl bg-obsidian border border-white/10 text-white font-bold uppercase tracking-widest hover:bg-white/5 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                  {/* Save ID prompt */}
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start space-x-3 mb-6">
+                    <Copy size={14} className="text-sensual-red mt-0.5 shrink-0" />
+                    <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
+                      Save your booking ID: <button onClick={() => { navigator.clipboard.writeText(bookingResult?._id || ''); toast.success('ID copied') }} className="text-sensual-red font-bold hover:underline">{bookingResult?._id?.slice(-8)}</button> — use it on the <span className="text-white">Manage Booking</span> page to check your status
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 mt-auto">
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(bookingResult?._id || ''); toast.success('Booking ID copied') }}
+                      className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center space-x-2 text-xs"
                     >
-                      {isDownloading ? (
-                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        <Download size={18} />
-                      )}
-                      <span>{isDownloading ? 'Generating PDF...' : 'Download Receipt'}</span>
+                      <Copy size={16} />
+                      <span>Copy Booking ID</span>
                     </button>
-                    <button 
+                    <button
                       onClick={onClose}
                       className="w-full py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest red-shadow hover:scale-105 transition-all"
                     >
@@ -797,8 +798,8 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     </button>
                   </div>
 
-                  <p className="mt-auto text-center text-white/20 text-[8px] uppercase tracking-[0.5em] pt-8">
-                    Fantasy Island Confidential &bull; Digital Signature Verified
+                  <p className="mt-8 text-center text-white/10 text-[8px] uppercase tracking-[0.5em]">
+                    Fantasy Island &bull; Verification usually within 24 hours
                   </p>
                 </motion.div>
               )}
