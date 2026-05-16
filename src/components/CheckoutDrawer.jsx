@@ -28,6 +28,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
       setStep(1)
       setBookingResult(null)
       setActiveImg(0)
+      setPaymentConfirmed(false)
     }
   }, [isOpen])
 
@@ -125,6 +126,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
 
   const isSubmitting = bookingMutation.isPending
 
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [slideDirection, setSlideDirection] = useState(0) // -1 left, 1 right
@@ -548,7 +550,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                             ].filter(m => m.enabled).map((m) => (
                               <button
                                 key={m.id}
-                                onClick={() => setFormData({ ...formData, paymentMethod: m.id })}
+                                onClick={() => { setFormData({ ...formData, paymentMethod: m.id }); setPaymentConfirmed(false) }}
                                 className={`w-full p-6 rounded-2xl border transition-all duration-300 text-left flex items-center group ${
                                   formData.paymentMethod === m.id 
                                     ? 'bg-sensual-red/10 border-sensual-red red-shadow' 
@@ -627,6 +629,17 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                     <Copy size={16} />
                                   </button>
                                 </div>
+                                <label className="flex items-start space-x-3 cursor-pointer pt-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={paymentConfirmed}
+                                    onChange={(e) => setPaymentConfirmed(e.target.checked)}
+                                    className="mt-0.5 accent-sensual-red w-4 h-4 shrink-0"
+                                  />
+                                  <span className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
+                                    I confirm I have sent the total amount of <span className="text-white font-bold">${(room.price * parseInt(formData.duration)) + 50}</span> to the account above
+                                  </span>
+                                </label>
                               </motion.div>
                             )}
 
@@ -659,6 +672,17 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                   <span>Verify Transaction</span>
                                   <ExternalLink size={14} />
                                 </button>
+                                <label className="flex items-start space-x-3 cursor-pointer pt-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={paymentConfirmed}
+                                    onChange={(e) => setPaymentConfirmed(e.target.checked)}
+                                    className="mt-0.5 accent-sensual-red w-4 h-4 shrink-0"
+                                  />
+                                  <span className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
+                                    I confirm I have sent <span className="text-white font-bold">${(room.price * parseInt(formData.duration)) + 50}</span> to the Bitcoin address above
+                                  </span>
+                                </label>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -683,8 +707,10 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     )}
                     <button 
                         onClick={step === 4 ? () => handleConfirmBooking() : handleNext}
-                        disabled={isSubmitting}
-                        className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || (step === 4 && formData.paymentMethod !== 'PayPal' && !paymentConfirmed)}
+                        className={`flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          step === 4 && formData.paymentMethod === 'PayPal' ? 'hidden' : ''
+                        }`}
                       >
                         <span>{isSubmitting ? 'Processing...' : (step === 4 ? 'Confirm Booking' : 'Continue')}</span>
                         {!isSubmitting && <ChevronRight size={18} />}
