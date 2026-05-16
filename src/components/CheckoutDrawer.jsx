@@ -724,82 +724,56 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex-grow flex flex-col"
+                  className="flex-grow flex flex-col items-center justify-center text-center py-8"
                 >
-                  {/* Status Icon */}
-                  <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mb-4 mx-auto">
-                      <AlertCircle className="text-amber-400 w-8 h-8" />
-                    </div>
-                    <h2 className="text-3xl font-display">Booking <span className="text-amber-400">Received</span></h2>
-                    <p className="text-white/40 text-xs uppercase tracking-widest mt-2">Awaiting payment verification</p>
+                  <div className="w-20 h-20 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center mb-6">
+                    <AlertCircle className="text-amber-400 w-10 h-10" />
                   </div>
 
-                  {/* Info Banner */}
-                  <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 mb-6">
-                    <p className="text-amber-400/80 text-[11px] uppercase tracking-widest leading-relaxed text-center">
-                      Your booking request has been received. Once our team verifies your payment, your reservation will be confirmed.
-                    </p>
-                  </div>
+                  <h2 className="text-3xl font-display mb-2">Request <span className="text-amber-400">Received</span></h2>
+                  <p className="text-white/40 text-[10px] uppercase tracking-widest mb-8">
+                    Pending payment verification
+                  </p>
 
-                  {/* Booking Summary */}
-                  <div ref={receiptRef} className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4 mb-6">
-                    <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Booking ID</span>
-                      <span className="text-xs font-mono text-white/60">{bookingResult?._id}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Guest</span>
-                      <span className="text-sm font-bold">{formData.name}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Suite</span>
+                  <div className="w-full p-6 rounded-2xl bg-white/5 border border-white/10 text-left space-y-3 mb-6">
+                    <div className="flex justify-between">
+                      <span className="text-white/30 text-[10px] uppercase tracking-widest">Suite</span>
                       <span className="text-sm font-bold">{room?.title}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Check-in</span>
+                    <div className="flex justify-between">
+                      <span className="text-white/30 text-[10px] uppercase tracking-widest">Check-in</span>
                       <span className="text-sm font-bold">{formData.date}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Duration</span>
+                    <div className="flex justify-between">
+                      <span className="text-white/30 text-[10px] uppercase tracking-widest">Duration</span>
                       <span className="text-sm font-bold">{formData.duration} Night{formData.duration > 1 ? 's' : ''}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Payment</span>
+                    <div className="flex justify-between">
+                      <span className="text-white/30 text-[10px] uppercase tracking-widest">Payment</span>
                       <span className="text-sm font-bold">{formData.paymentMethod}</span>
                     </div>
-                    <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Total</span>
-                      <span className="text-xl font-bold text-sensual-red">${(room?.price * parseInt(formData.duration)) + 50}</span>
+                    <div className="h-px bg-white/5" />
+                    <div className="flex justify-between">
+                      <span className="text-white/30 text-[10px] uppercase tracking-widest">Total</span>
+                      <span className="text-lg font-bold text-sensual-red">${(room?.price * parseInt(formData.duration)) + 50}</span>
                     </div>
                   </div>
 
-                  {/* Save ID prompt */}
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start space-x-3 mb-6">
-                    <Copy size={14} className="text-sensual-red mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
-                      Save your booking ID: <button onClick={() => { navigator.clipboard.writeText(bookingResult?._id || ''); toast.success('ID copied') }} className="text-sensual-red font-bold hover:underline">{bookingResult?._id?.slice(-8)}</button> — use it on the <span className="text-white">Manage Booking</span> page to check your status
+                  <div className="w-full p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 mb-8">
+                    <p className="text-amber-400/70 text-[10px] uppercase tracking-widest leading-relaxed">
+                      Use your email <span className="text-white font-bold">{formData.email}</span> on the <span className="text-white font-bold">Manage Booking</span> page to track your reservation status
                     </p>
                   </div>
 
-                  <div className="space-y-3 mt-auto">
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(bookingResult?._id || ''); toast.success('Booking ID copied') }}
-                      className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center space-x-2 text-xs"
-                    >
-                      <Copy size={16} />
-                      <span>Copy Booking ID</span>
-                    </button>
-                    <button
-                      onClick={onClose}
-                      className="w-full py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest red-shadow hover:scale-105 transition-all"
-                    >
-                      Return to Suites
-                    </button>
-                  </div>
+                  <button
+                    onClick={onClose}
+                    className="w-full py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest red-shadow hover:scale-105 transition-all"
+                  >
+                    Return to Suites
+                  </button>
 
-                  <p className="mt-8 text-center text-white/10 text-[8px] uppercase tracking-[0.5em]">
-                    Fantasy Island &bull; Verification usually within 24 hours
+                  <p className="mt-8 text-white/10 text-[8px] uppercase tracking-[0.5em]">
+                    Fantasy Island &bull; Verification within 24 hours
                   </p>
                 </motion.div>
               )}

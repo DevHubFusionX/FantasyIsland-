@@ -1,306 +1,184 @@
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Search, Calendar, User, Phone, Mail, Clock, Save, Trash2, CheckCircle2, Loader2, AlertCircle, XCircle, Clock3 } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-hot-toast'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Mail, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { API } from '../config/api'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
+const statusConfig = {
+  Pending: {
+    icon: AlertCircle,
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10 border-amber-500/30',
+    label: 'Awaiting Verification',
+    message: 'Your payment is being reviewed. We will confirm your reservation shortly.'
+  },
+  Confirmed: {
+    icon: CheckCircle2,
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-500/10 border-emerald-500/30',
+    label: 'Reservation Confirmed',
+    message: 'Your payment has been verified. Your suite is reserved and ready for your arrival.'
+  },
+  Cancelled: {
+    icon: XCircle,
+    color: 'text-red-400',
+    bg: 'bg-red-500/10 border-red-500/30',
+    label: 'Reservation Cancelled',
+    message: 'This reservation has been cancelled. Contact us if you believe this is an error.'
+  },
+  Completed: {
+    icon: CheckCircle2,
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/10 border-blue-500/30',
+    label: 'Stay Completed',
+    message: 'Thank you for your stay at Fantasy Island. We hope to welcome you again.'
+  }
+}
+
+const BookingCard = ({ booking }) => {
+  const s = statusConfig[booking.bookingStatus] || statusConfig.Pending
+  const Icon = s.icon
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden"
+    >
+      {/* Status Banner */}
+      <div className={`flex items-center space-x-3 p-5 border-b border-white/5 ${s.bg}`}>
+        <Icon size={20} className={s.color} />
+        <div>
+          <div className={`font-bold text-sm uppercase tracking-widest ${s.color}`}>{s.label}</div>
+          <div className="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">{s.message}</div>
+        </div>
+      </div>
+
+      {/* Booking Details */}
+      <div className="p-6 space-y-3">
+        <div className="flex justify-between items-center">
+          <span className="text-white/30 text-[10px] uppercase tracking-widest">Suite</span>
+          <span className="text-sm font-bold">{booking.suiteTitle}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-white/30 text-[10px] uppercase tracking-widest">Check-in</span>
+          <span className="text-sm font-bold">{new Date(booking.checkInDate).toLocaleDateString()}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-white/30 text-[10px] uppercase tracking-widest">Duration</span>
+          <span className="text-sm font-bold">{booking.duration} Night{booking.duration > 1 ? 's' : ''}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-white/30 text-[10px] uppercase tracking-widest">Payment</span>
+          <span className="text-sm font-bold">{booking.paymentMethod}</span>
+        </div>
+        <div className="h-px bg-white/5" />
+        <div className="flex justify-between items-center">
+          <span className="text-white/30 text-[10px] uppercase tracking-widest">Total</span>
+          <span className="text-lg font-bold text-sensual-red">${booking.totalAmount}</span>
+        </div>
+        <div className="pt-1">
+          <span className="text-white/20 text-[9px] font-mono">ID: {booking._id}</span>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 const ManageBooking = () => {
-  const queryClient = useQueryClient()
-  const [bookingId, setBookingId] = useState('')
-  const [searchId, setSearchId] = useState(null)
-  const [localBooking, setLocalBooking] = useState(null)
+  const [email, setEmail] = useState('')
+  const [searchEmail, setSearchEmail] = useState(null)
 
-  const { data: booking, isLoading: loading, error } = useQuery({
-    queryKey: ['booking', searchId],
+  const { data: bookings, isLoading, error } = useQuery({
+    queryKey: ['bookings-by-email', searchEmail],
     queryFn: async () => {
-      const response = await fetch(`${API.bookings}/${searchId}`)
-      const data = await response.json()
-      if (!data.success) throw new Error(data.message || 'Booking not found')
-      setLocalBooking(data.data)
+      const res = await fetch(`${API.bookings}/by-email/${encodeURIComponent(searchEmail)}`)
+      const data = await res.json()
+      if (!data.success) throw new Error(data.message || 'No bookings found')
       return data.data
     },
-    enabled: !!searchId,
+    enabled: !!searchEmail,
     retry: false
-  })
-
-  const updateMutation = useMutation({
-    mutationFn: async (updatedData) => {
-      const { _id, __v, createdAt, updatedAt, ...fields } = updatedData
-      const response = await fetch(`${API.bookings}/${_id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fields)
-      })
-      const data = await response.json()
-      if (!data.success) throw new Error(data.message)
-      return data.data
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['booking', searchId], data)
-      setLocalBooking(data)
-      toast.success('Reservation updated')
-    },
-    onError: (err) => {
-      toast.error(err.message || 'Update failed')
-    }
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      const response = await fetch(`${API.bookings}/${id}`, { method: 'DELETE' })
-      const data = await response.json()
-      if (!data.success) throw new Error(data.message)
-      return data
-    },
-    onSuccess: () => {
-      toast.success('Reservation cancelled')
-      queryClient.removeQueries({ queryKey: ['booking', searchId] })
-      setSearchId(null)
-      setLocalBooking(null)
-      setBookingId('')
-    },
-    onError: (err) => {
-      toast.error(err.message || 'Cancellation failed')
-    }
   })
 
   const handleSearch = (e) => {
     e.preventDefault()
-    if (!bookingId.trim()) return
-    setSearchId(bookingId.trim())
-  }
-
-  const handleUpdate = (e) => {
-    e.preventDefault()
-    updateMutation.mutate(localBooking)
-  }
-
-  const handleDelete = () => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return
-    deleteMutation.mutate(localBooking._id)
-  }
-
-  const isUpdating = updateMutation.isPending
-
-  const statusConfig = {
-    Pending: {
-      icon: Clock3,
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/10 border-amber-500/20',
-      label: 'Awaiting Verification',
-      message: 'Your payment is being reviewed. Our team will confirm your reservation shortly.'
-    },
-    Confirmed: {
-      icon: CheckCircle2,
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10 border-emerald-500/20',
-      label: 'Reservation Confirmed',
-      message: 'Your payment has been verified and your suite is reserved. We look forward to your arrival.'
-    },
-    Cancelled: {
-      icon: XCircle,
-      color: 'text-red-400',
-      bg: 'bg-red-500/10 border-red-500/20',
-      label: 'Reservation Cancelled',
-      message: 'This reservation has been cancelled. Please contact us if you believe this is an error.'
-    },
-    Completed: {
-      icon: CheckCircle2,
-      color: 'text-blue-400',
-      bg: 'bg-blue-500/10 border-blue-500/20',
-      label: 'Stay Completed',
-      message: 'Thank you for your stay at Fantasy Island. We hope to welcome you again.'
-    }
+    if (!email.trim()) return
+    setSearchEmail(email.trim().toLowerCase())
   }
 
   return (
     <div className="bg-obsidian min-h-screen text-white font-sans">
       <Navbar />
-      
-      <main className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-5xl font-display font-bold mb-4">Manage <span className="text-sensual-red">Reservation</span></h1>
-          <p className="text-white/40 uppercase tracking-widest text-xs">Access and modify your existing booking details</p>
+
+      <main className="pt-32 pb-20 px-6 max-w-2xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
+          <h1 className="text-5xl font-display font-bold mb-4">Track Your <span className="text-sensual-red">Booking</span></h1>
+          <p className="text-white/40 uppercase tracking-widest text-xs">Enter the email you used when booking</p>
         </motion.div>
 
-        {!booking && !error ? (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12"
-          >
-            <form onSubmit={handleSearch} className="space-y-6">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-sensual-red transition-colors" size={20} />
-                <input 
-                  type="text" 
-                  placeholder="Enter Booking ID (e.g. 64abc...)"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-lg"
-                  value={bookingId}
-                  onChange={(e) => setBookingId(e.target.value)}
-                  required
-                />
-              </div>
-              <button 
-                type="submit"
-                disabled={loading}
-                className="w-full py-5 bg-sensual-red text-white font-bold uppercase tracking-[0.2em] rounded-2xl red-shadow hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-              >
-                {loading ? 'Searching...' : 'Find Reservation'}
-              </button>
-            </form>
-          </motion.div>
-        ) : error ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 text-center space-y-6"
-          >
-            <p className="text-sensual-red font-bold uppercase tracking-widest text-sm">{error.message}</p>
+        {/* Search Form */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="relative group">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-sensual-red transition-colors" size={20} />
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-base"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
             <button
-              onClick={() => { setSearchId(null); setBookingId('') }}
-              className="py-4 px-8 bg-white/5 border border-white/10 rounded-2xl text-white/60 font-bold uppercase tracking-widest hover:bg-white/10 transition-all text-xs"
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-5 bg-sensual-red text-white font-bold uppercase tracking-[0.2em] rounded-2xl red-shadow hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
             >
-              Try Again
+              {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Clock size={18} />}
+              <span>{isLoading ? 'Searching...' : 'Check Status'}</span>
             </button>
-          </motion.div>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {/* Booking Summary Sidebar */}
-            <div className="md:col-span-1 space-y-6">
-              {(() => {
-                const s = statusConfig[localBooking?.bookingStatus] || statusConfig.Pending
-                const Icon = s.icon
-                return (
-                  <div className={`border rounded-3xl p-6 ${s.bg}`}>
-                    <div className="flex items-center space-x-3 mb-4">
-                      <Icon size={22} className={s.color} />
-                      <div>
-                        <div className="text-[10px] text-white/30 uppercase tracking-widest">Booking Status</div>
-                        <div className={`font-bold text-sm uppercase tracking-widest ${s.color}`}>{s.label}</div>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">{s.message}</p>
-                    <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-white/30 text-[10px] uppercase tracking-widest">Suite</span>
-                        <span className="text-xs font-bold">{localBooking?.suiteTitle}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-white/30 text-[10px] uppercase tracking-widest">Amount</span>
-                        <span className={`text-xs font-bold ${s.color}`}>${localBooking?.totalAmount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-white/30 text-[10px] uppercase tracking-widest">Payment</span>
-                        <span className="text-xs font-bold">{localBooking?.paymentMethod}</span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })()}
-              
-              <button 
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
-                className="w-full py-4 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 text-white/40 hover:text-red-500 rounded-2xl transition-all flex items-center justify-center space-x-2 text-xs uppercase tracking-widest font-bold disabled:opacity-50"
-              >
-                {deleteMutation.isPending ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
-                <span>{deleteMutation.isPending ? 'Cancelling...' : 'Cancel Booking'}</span>
-              </button>
-            </div>
+          </form>
+        </motion.div>
 
-            {/* Edit Form */}
-            <div className="md:col-span-2">
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
-                <form onSubmit={handleUpdate} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 ml-2">Guest Name</label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                        <input 
-                          type="text" 
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={localBooking?.guestName || ''}
-                          onChange={(e) => setLocalBooking({...localBooking, guestName: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 ml-2">Email</label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                        <input 
-                          type="email" 
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={localBooking?.email || ''}
-                          onChange={(e) => setLocalBooking({...localBooking, email: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 ml-2">Phone</label>
-                      <div className="relative">
-                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                        <input 
-                          type="tel" 
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={localBooking?.phone || ''}
-                          onChange={(e) => setLocalBooking({...localBooking, phone: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 ml-2">Date</label>
-                      <div className="relative">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                        <input 
-                          type="date" 
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm [color-scheme:dark]"
-                          value={localBooking?.checkInDate?.split('T')[0] || ''}
-                          onChange={(e) => setLocalBooking({...localBooking, checkInDate: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 ml-2">Duration (Nights)</label>
-                      <div className="relative">
-                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                        <input 
-                          type="number" 
-                          min="1"
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 transition-all text-sm"
-                          value={localBooking?.duration || ''}
-                          onChange={(e) => setLocalBooking({...localBooking, duration: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <button 
-                    type="submit"
-                    disabled={isUpdating}
-                    className="w-full py-4 bg-white/5 border border-sensual-red/30 hover:bg-sensual-red text-white font-bold uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
-                  >
-                    {isUpdating ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                    <span>{isUpdating ? 'Saving...' : 'Save Changes'}</span>
-                  </button>
-                </form>
+        {/* Results */}
+        <AnimatePresence mode="wait">
+          {error && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="text-center p-8 bg-white/5 border border-white/10 rounded-3xl space-y-4"
+            >
+              <AlertCircle className="mx-auto text-white/20" size={40} />
+              <p className="text-white/40 uppercase tracking-widest text-xs">{error.message}</p>
+              <button
+                onClick={() => setSearchEmail(null)}
+                className="text-sensual-red text-xs uppercase tracking-widest font-bold hover:underline flex items-center space-x-1 mx-auto"
+              >
+                <ArrowLeft size={12} />
+                <span>Try another email</span>
+              </button>
+            </motion.div>
+          )}
+
+          {bookings && (
+            <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <p className="text-white/30 text-[10px] uppercase tracking-widest">{bookings.length} booking{bookings.length > 1 ? 's' : ''} found</p>
+                <button
+                  onClick={() => { setSearchEmail(null); setEmail('') }}
+                  className="text-sensual-red text-[10px] uppercase tracking-widest font-bold hover:underline flex items-center space-x-1"
+                >
+                  <ArrowLeft size={10} />
+                  <span>Search again</span>
+                </button>
               </div>
-            </div>
-          </motion.div>
-        )}
+              {bookings.map(b => <BookingCard key={b._id} booking={b} />)}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <Footer />
