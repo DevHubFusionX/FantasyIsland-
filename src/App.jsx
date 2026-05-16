@@ -9,6 +9,7 @@ import ManageBooking from './pages/ManageBooking'
 import AdminLogin from './pages/AdminLogin'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import TawkChat from './components/TawkChat'
 
 // Lazy-load admin routes — guests never download admin code
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -68,6 +69,7 @@ function App() {
         />
         <AuthProvider>
           <Router>
+            <TawkChat />
           <div className="min-h-screen bg-obsidian text-white font-sans selection:bg-sensual-red selection:text-white">
 
             <Routes>
