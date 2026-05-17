@@ -617,7 +617,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                     className="mt-0.5 accent-sensual-red w-4 h-4 shrink-0"
                                   />
                                   <span className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
-                                    I confirm I have sent the total amount of <span className="text-white font-bold">${(room.price * parseInt(formData.duration)) + 50}</span> to the account above
+                                    I confirm I have sent the total amount of <span className="text-white font-bold">${room.price}</span> to the account above
                                   </span>
                                 </label>
                               </motion.div>
@@ -660,7 +660,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                     className="mt-0.5 accent-sensual-red w-4 h-4 shrink-0"
                                   />
                                   <span className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
-                                    I confirm I have sent <span className="text-white font-bold">${(room.price * parseInt(formData.duration)) + 50}</span> to the Bitcoin address above
+                                    I confirm I have sent <span className="text-white font-bold">${room.price}</span> to the Bitcoin address above
                                   </span>
                                 </label>
                               </motion.div>
