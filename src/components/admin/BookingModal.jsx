@@ -250,11 +250,10 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
                     <input 
                       type="number" 
                       required
-                      min="3"
-                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white"
+                      readOnly
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white/50 cursor-not-allowed"
                       value={formData.duration}
-                      onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                      placeholder="Duration (Days)"
+                      placeholder="Duration (3 Days Fixed)"
                     />
                   </div>
                   <div className="relative group">

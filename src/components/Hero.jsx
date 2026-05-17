@@ -48,7 +48,7 @@ const Hero = () => {
           email: formData.email,
           room: formData.room || selectedSuite?.title,
           date: formData.date,
-          duration: formData.duration
+          duration: selectedSuite?.maxDays || 3
         }
       }
     })
@@ -170,21 +170,8 @@ const Hero = () => {
                   </div>
                 </div>
 
-                <div className="relative">
-                  <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={14} />
-                  <select 
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 outline-none focus:border-sensual-red/30 transition-all text-[11px] uppercase text-white/70 appearance-none"
-                    value={formData.duration}
-                    onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                  >
-                    {Array.from({ length: Math.max(1, maxDays - 2) }, (_, i) => i + 3).map(n => {
-                      const unit = selectedSuite?.durationType || 'Night'
-                      const formattedUnit = unit === 'Night' ? 'Day' : unit
-                      return (
-                        <option key={n} value={n} className="bg-obsidian">{n} {formattedUnit}{n > 1 ? 's' : ''}</option>
-                      )
-                    })}
-                  </select>
+                <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-[11px] uppercase text-white/50 tracking-wider">
+                  <span className="flex-1 text-left">Stay Duration: {selectedSuite?.maxDays || 3} Days (Fixed)</span>
                 </div>
 
                 <button 

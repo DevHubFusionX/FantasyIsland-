@@ -101,8 +101,8 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
       suiteTitle: room.title,
       suitePrice: room.price,
       checkInDate: formData.date,
-      duration: parseInt(formData.duration),
-      totalAmount: (room.price * parseInt(formData.duration)) + 50,
+      duration: room.maxDays || 3,
+      totalAmount: room.price + 50,
       paymentMethod: formData.paymentMethod,
       paymentStatus: transactionId ? 'Completed' : 'Pending',
       ...(transactionId && { transactionId })
@@ -415,7 +415,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           </AnimatePresence>
 
                           <h3 className="text-2xl md:text-3xl font-display mb-2 md:mb-4">{room.title}</h3>
-                          <div className="text-xl md:text-2xl font-bold text-sensual-red mb-4 md:mb-6">${room.price} <span className="text-white/20 text-[10px] md:text-sm font-light uppercase tracking-widest">/ {room.durationType || 'Night'}</span></div>
+                          <div className="text-xl md:text-2xl font-bold text-sensual-red mb-4 md:mb-6">${room.price} <span className="text-white/20 text-[10px] md:text-sm font-light uppercase tracking-widest">/ {room.maxDays || 3} Days</span></div>
                           <p className="text-white/50 text-[11px] md:text-sm leading-relaxed mb-6 md:mb-8">
                             Experience absolute privacy in our most sought-after obsidian finished sanctuary. 
                             Includes all standard luxury amenities and personal concierge support.
@@ -499,28 +499,16 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                 onChange={(e) => setFormData({...formData, date: e.target.value})}
                               />
                             </div>
-                            <div className="relative group">
-                              <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-sensual-red transition-colors" size={18} />
-                              <select 
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-sm appearance-none cursor-pointer"
-                                value={formData.duration}
-                                onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                              >
-                                {Array.from({ length: Math.max(1, (room.maxDays || 7) - 2) }, (_, i) => i + 3).map(n => {
-                                  const unit = room.durationType || 'Night'
-                                  const formattedUnit = unit === 'Night' ? 'Day' : unit
-                                  return (
-                                    <option key={n} value={n} className="bg-obsidian">{n} {formattedUnit}{n > 1 ? 's' : ''}</option>
-                                  )
-                                })}
-                              </select>
+                            <div className="relative group flex items-center bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-sm text-white/50">
+                              <Clock className="text-white/30 mr-3" size={18} />
+                              <span>{room.maxDays || 3} Days (Fixed Stay)</span>
                             </div>
                           </div>
                           
                           <div className="mt-8 p-6 rounded-2xl bg-sensual-red/10 border border-sensual-red/20">
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-white/40 text-xs uppercase tracking-widest">Subtotal</span>
-                              <span className="text-white font-bold">${room.price * formData.duration}</span>
+                              <span className="text-white font-bold">${room.price}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-white/40 text-xs uppercase tracking-widest">Service Fee</span>
@@ -529,7 +517,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                             <div className="h-px bg-white/10 my-4" />
                             <div className="flex justify-between items-center">
                               <span className="text-white uppercase tracking-widest text-sm font-bold">Total</span>
-                              <span className="text-sensual-red text-xl font-bold">${(room.price * formData.duration) + 50}</span>
+                              <span className="text-sensual-red text-xl font-bold">${room.price + 50}</span>
                             </div>
                           </div>
                         </motion.div>
@@ -747,7 +735,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/30 text-[10px] uppercase tracking-widest">Duration</span>
-                      <span className="text-sm font-bold">{formData.duration} Day{formData.duration > 1 ? 's' : ''}</span>
+                      <span className="text-sm font-bold">{room?.maxDays || 3} Days</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/30 text-[10px] uppercase tracking-widest">Payment</span>
@@ -756,7 +744,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     <div className="h-px bg-white/5" />
                     <div className="flex justify-between">
                       <span className="text-white/30 text-[10px] uppercase tracking-widest">Total</span>
-                      <span className="text-lg font-bold text-sensual-red">${(room?.price * parseInt(formData.duration)) + 50}</span>
+                      <span className="text-lg font-bold text-sensual-red">${(room?.price || 0) + 50}</span>
                     </div>
                   </div>
 
