@@ -172,7 +172,7 @@ const AdminBookings = () => {
           {/* Desktop Table View */}
           <div className="hidden lg:block bg-white/5 border border-white/5 rounded-3xl md:rounded-[2.5rem] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse min-w-[1000px]">
                 <thead>
                   <tr className="border-b border-white/5 bg-white/[0.02] text-[10px] uppercase tracking-[0.2em] font-bold text-white/30">
                     <th className="px-8 py-6">Guest Identity</th>
