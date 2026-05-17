@@ -12,7 +12,7 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
     suiteTitle: '',
     suitePrice: '0',
     checkInDate: '',
-    duration: '1',
+    duration: '3',
     totalAmount: '0',
     paymentMethod: 'Bank Transfer',
     bookingStatus: 'Pending',
@@ -28,7 +28,7 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
         suiteTitle: booking.suiteTitle || '',
         suitePrice: booking.suitePrice || '0',
         checkInDate: booking.checkInDate ? new Date(booking.checkInDate).toISOString().split('T')[0] : '',
-        duration: booking.duration || '1',
+        duration: booking.duration || '3',
         totalAmount: booking.totalAmount || '0',
         paymentMethod: booking.paymentMethod || 'Bank Transfer',
         bookingStatus: booking.bookingStatus || 'Pending',
@@ -42,7 +42,7 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
         suiteTitle: '',
         suitePrice: '0',
         checkInDate: new Date().toISOString().split('T')[0],
-        duration: '1',
+        duration: '3',
         totalAmount: '0',
         paymentMethod: 'Bank Transfer',
         bookingStatus: 'Pending',
@@ -242,7 +242,7 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white"
                       value={formData.suitePrice}
                       onChange={(e) => setFormData({...formData, suitePrice: e.target.value})}
-                      placeholder="Suite Price / Night"
+                      placeholder="Suite Price / Day"
                     />
                   </div>
                   <div className="relative group">
@@ -250,10 +250,11 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
                     <input 
                       type="number" 
                       required
+                      min="3"
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-4 outline-none focus:border-sensual-red/30 focus:bg-white/[0.08] transition-all text-sm text-white"
                       value={formData.duration}
                       onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                      placeholder="Duration"
+                      placeholder="Duration (Days)"
                     />
                   </div>
                   <div className="relative group">

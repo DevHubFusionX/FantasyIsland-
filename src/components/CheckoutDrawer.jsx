@@ -18,7 +18,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     email: '',
     phone: '',
     date: '',
-    duration: '1',
+    duration: '3',
     paymentMethod: 'Bank Transfer'
   })
 
@@ -506,10 +506,11 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                 value={formData.duration}
                                 onChange={(e) => setFormData({...formData, duration: e.target.value})}
                               >
-                                {Array.from({ length: room.maxDays || 7 }, (_, i) => i + 1).map(n => {
+                                {Array.from({ length: Math.max(1, (room.maxDays || 7) - 2) }, (_, i) => i + 3).map(n => {
                                   const unit = room.durationType || 'Night'
+                                  const formattedUnit = unit === 'Night' ? 'Day' : unit
                                   return (
-                                    <option key={n} value={n} className="bg-obsidian">{n} {unit}{n > 1 ? 's' : ''}</option>
+                                    <option key={n} value={n} className="bg-obsidian">{n} {formattedUnit}{n > 1 ? 's' : ''}</option>
                                   )
                                 })}
                               </select>
@@ -746,7 +747,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/30 text-[10px] uppercase tracking-widest">Duration</span>
-                      <span className="text-sm font-bold">{formData.duration} Night{formData.duration > 1 ? 's' : ''}</span>
+                      <span className="text-sm font-bold">{formData.duration} Day{formData.duration > 1 ? 's' : ''}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/30 text-[10px] uppercase tracking-widest">Payment</span>

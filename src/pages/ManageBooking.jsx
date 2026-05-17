@@ -79,7 +79,7 @@ const BookingCard = ({ booking, index }) => {
       <div className="grid grid-cols-2 gap-px bg-white/5">
         {[
           { icon: Calendar, label: 'Check-in', value: new Date(booking.checkInDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) },
-          { icon: Clock, label: 'Duration', value: `${booking.duration} Night${booking.duration > 1 ? 's' : ''}` },
+          { icon: Clock, label: 'Duration', value: `${booking.duration} Day${booking.duration > 1 ? 's' : ''}` },
           { icon: CreditCard, label: 'Payment', value: booking.paymentMethod },
           { label: 'Total', value: `$${booking.totalAmount}`, highlight: true }
         ].map((item, i) => (

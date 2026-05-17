@@ -14,7 +14,7 @@ const Hero = () => {
     email: '',
     room: '',
     date: '',
-    duration: '1'
+    duration: '3'
   })
 
   const { data: suites = [] } = useQuery({
@@ -177,10 +177,11 @@ const Hero = () => {
                     value={formData.duration}
                     onChange={(e) => setFormData({...formData, duration: e.target.value})}
                   >
-                    {Array.from({ length: maxDays }, (_, i) => i + 1).map(n => {
+                    {Array.from({ length: Math.max(1, maxDays - 2) }, (_, i) => i + 3).map(n => {
                       const unit = selectedSuite?.durationType || 'Night'
+                      const formattedUnit = unit === 'Night' ? 'Day' : unit
                       return (
-                        <option key={n} value={n} className="bg-obsidian">{n} {unit}{n > 1 ? 's' : ''}</option>
+                        <option key={n} value={n} className="bg-obsidian">{n} {formattedUnit}{n > 1 ? 's' : ''}</option>
                       )
                     })}
                   </select>
