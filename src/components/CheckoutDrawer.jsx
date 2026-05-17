@@ -102,7 +102,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
       suitePrice: room.price,
       checkInDate: formData.date,
       duration: room.maxDays || 3,
-      totalAmount: room.price + 50,
+      totalAmount: room.price,
       paymentMethod: formData.paymentMethod,
       paymentStatus: transactionId ? 'Completed' : 'Pending',
       ...(transactionId && { transactionId })
@@ -506,18 +506,9 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           </div>
                           
                           <div className="mt-8 p-6 rounded-2xl bg-sensual-red/10 border border-sensual-red/20">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-white/40 text-xs uppercase tracking-widest">Subtotal</span>
-                              <span className="text-white font-bold">${room.price}</span>
-                            </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-white/40 text-xs uppercase tracking-widest">Service Fee</span>
-                              <span className="text-white font-bold">$50</span>
-                            </div>
-                            <div className="h-px bg-white/10 my-4" />
-                            <div className="flex justify-between items-center">
-                              <span className="text-white uppercase tracking-widest text-sm font-bold">Total</span>
-                              <span className="text-sensual-red text-xl font-bold">${room.price + 50}</span>
+                              <span className="text-white uppercase tracking-widest text-sm font-bold">Total stay price</span>
+                              <span className="text-sensual-red text-xl font-bold">${room.price}</span>
                             </div>
                           </div>
                         </motion.div>
@@ -744,7 +735,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     <div className="h-px bg-white/5" />
                     <div className="flex justify-between">
                       <span className="text-white/30 text-[10px] uppercase tracking-widest">Total</span>
-                      <span className="text-lg font-bold text-sensual-red">${(room?.price || 0) + 50}</span>
+                      <span className="text-lg font-bold text-sensual-red">${room?.price || 0}</span>
                     </div>
                   </div>
 
