@@ -579,6 +579,17 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                 <p className="text-[10px] text-white/30 uppercase tracking-widest text-center">
                                   Send payment via PayPal using the client ID above
                                 </p>
+                                <label className="flex items-start space-x-3 cursor-pointer pt-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={paymentConfirmed}
+                                    onChange={(e) => setPaymentConfirmed(e.target.checked)}
+                                    className="mt-0.5 accent-sensual-red w-4 h-4 shrink-0"
+                                  />
+                                  <span className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
+                                    I confirm I have sent the total amount of <span className="text-white font-bold">${room.price}</span> via PayPal to the Client ID above
+                                  </span>
+                                </label>
                               </motion.div>
                             )}
 
@@ -687,10 +698,8 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     )}
                     <button 
                         onClick={step === 4 ? () => handleConfirmBooking() : handleNext}
-                        disabled={isSubmitting || (step === 4 && formData.paymentMethod !== 'PayPal' && !paymentConfirmed)}
-                        className={`flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                          step === 4 && formData.paymentMethod === 'PayPal' ? 'hidden' : ''
-                        }`}
+                        disabled={isSubmitting || (step === 4 && !paymentConfirmed)}
+                        className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span>{isSubmitting ? 'Processing...' : (step === 4 ? 'Confirm Booking' : 'Continue')}</span>
                         {!isSubmitting && <ChevronRight size={18} />}
