@@ -220,7 +220,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
             className="fixed top-0 left-0 h-full w-full max-w-lg bg-obsidian border-r border-sensual-red/20 z-[101] overflow-y-auto"
           >
             <div className="p-8 md:p-12 min-h-full flex flex-col">
-              
+
               {/* Header */}
               <div className="flex justify-between items-center mb-8 md:mb-12">
                 <div className="flex items-center space-x-2">
@@ -231,7 +231,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                     RESERVE<span className="text-sensual-red">SUITE</span>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={onClose}
                   className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
                 >
@@ -245,18 +245,15 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                   <div className="flex items-center justify-between mb-8 md:mb-12">
                     {steps.map((s, i) => (
                       <div key={i} className="flex flex-col items-center flex-1 relative">
-                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center mb-1.5 md:mb-2 transition-all duration-500 ${
-                          step >= i + 1 ? 'bg-sensual-red text-white red-shadow' : 'bg-white/5 text-white/20'
-                        }`}>
-                          <s.icon size={14} md:size={18} />
+                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center mb-1.5 md:mb-2 transition-all duration-500 ${step >= i + 1 ? 'bg-sensual-red text-white red-shadow' : 'bg-white/5 text-white/20'
+                          }`}>
+                          <s.icon size={14} md: size={18} />
                         </div>
-                        <span className={`text-[8px] md:text-[10px] uppercase tracking-widest font-bold ${
-                          step >= i + 1 ? 'text-white' : 'text-white/20'
-                        }`}>{s.title}</span>
+                        <span className={`text-[8px] md:text-[10px] uppercase tracking-widest font-bold ${step >= i + 1 ? 'text-white' : 'text-white/20'
+                          }`}>{s.title}</span>
                         {i < 3 && (
-                          <div className={`absolute top-4 md:top-5 -right-1/2 w-full h-[1px] ${
-                            step > i + 1 ? 'bg-sensual-red' : 'bg-white/10'
-                          }`} />
+                          <div className={`absolute top-4 md:top-5 -right-1/2 w-full h-[1px] ${step > i + 1 ? 'bg-sensual-red' : 'bg-white/10'
+                            }`} />
                         )}
                       </div>
                     ))}
@@ -337,9 +334,8 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                   <button
                                     key={i}
                                     onClick={() => goToImage(i)}
-                                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                                      activeImg === i ? 'bg-sensual-red w-5' : 'bg-white/15 w-1.5 hover:bg-white/30'
-                                    }`}
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${activeImg === i ? 'bg-sensual-red w-5' : 'bg-white/15 w-1.5 hover:bg-white/30'
+                                      }`}
                                   />
                                 ))}
                               </div>
@@ -417,7 +413,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           <h3 className="text-2xl md:text-3xl font-display mb-2 md:mb-4">{room.title}</h3>
                           <div className="text-xl md:text-2xl font-bold text-sensual-red mb-4 md:mb-6">${room.price} <span className="text-white/20 text-[10px] md:text-sm font-light uppercase tracking-widest">/ {room.maxDays || 3} Days</span></div>
                           <p className="text-white/50 text-[11px] md:text-sm leading-relaxed mb-6 md:mb-8">
-                            Experience absolute privacy in our most sought-after obsidian finished sanctuary. 
+                            Experience absolute privacy in our most sought-after obsidian finished sanctuary.
                             Includes all standard luxury amenities and personal concierge support.
                           </p>
                           <div className="grid grid-cols-2 gap-2 md:gap-3 mb-8 md:mb-10">
@@ -443,35 +439,35 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           <div className="space-y-4">
                             <div className="relative group">
                               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-sensual-red transition-colors" size={18} />
-                              <input 
+                              <input
                                 required
-                                type="text" 
+                                type="text"
                                 placeholder="Full Name"
                                 className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-sm"
                                 value={formData.name}
-                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                               />
                             </div>
                             <div className="relative group">
                               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-sensual-red transition-colors" size={18} />
-                              <input 
+                              <input
                                 required
-                                type="email" 
+                                type="email"
                                 placeholder="Email Address"
                                 className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-sm"
                                 value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                               />
                             </div>
                             <div className="relative group">
                               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-sensual-red transition-colors" size={18} />
-                              <input 
+                              <input
                                 required
-                                type="tel" 
+                                type="tel"
                                 placeholder="Phone Number"
                                 className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-sm"
                                 value={formData.phone}
-                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                               />
                             </div>
                           </div>
@@ -490,13 +486,13 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           <div className="space-y-4">
                             <div className="relative group">
                               <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-sensual-red transition-colors" size={18} />
-                              <input 
+                              <input
                                 required
-                                type="date" 
+                                type="date"
                                 min={new Date().toISOString().split('T')[0]}
                                 className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-sensual-red/50 focus:bg-white/10 transition-all text-sm [color-scheme:dark]"
                                 value={formData.date}
-                                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                               />
                             </div>
                             <div className="relative group flex items-center bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-sm text-white/50">
@@ -504,7 +500,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               <span>{room.maxDays || 3} Days (Fixed Stay)</span>
                             </div>
                           </div>
-                          
+
                           <div className="mt-8 p-6 rounded-2xl bg-sensual-red/10 border border-sensual-red/20">
                             <div className="flex justify-between items-center">
                               <span className="text-white uppercase tracking-widest text-sm font-bold">Total stay price</span>
@@ -531,21 +527,18 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               <button
                                 key={m.id}
                                 onClick={() => { setFormData({ ...formData, paymentMethod: m.id }); setPaymentConfirmed(false) }}
-                                className={`w-full p-6 rounded-2xl border transition-all duration-300 text-left flex items-center group ${
-                                  formData.paymentMethod === m.id 
-                                    ? 'bg-sensual-red/10 border-sensual-red red-shadow' 
+                                className={`w-full p-6 rounded-2xl border transition-all duration-300 text-left flex items-center group ${formData.paymentMethod === m.id
+                                    ? 'bg-sensual-red/10 border-sensual-red red-shadow'
                                     : 'bg-white/5 border-white/10 hover:border-white/20'
-                                }`}
+                                  }`}
                               >
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-6 transition-colors ${
-                                  formData.paymentMethod === m.id ? 'bg-sensual-red text-white' : 'bg-white/5 text-white/40'
-                                }`}>
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-6 transition-colors ${formData.paymentMethod === m.id ? 'bg-sensual-red text-white' : 'bg-white/5 text-white/40'
+                                  }`}>
                                   <m.icon size={24} />
                                 </div>
                                 <div>
-                                  <div className={`font-bold uppercase tracking-widest text-sm ${
-                                    formData.paymentMethod === m.id ? 'text-white' : 'text-white/60'
-                                  }`}>{m.id}</div>
+                                  <div className={`font-bold uppercase tracking-widest text-sm ${formData.paymentMethod === m.id ? 'text-white' : 'text-white/60'
+                                    }`}>{m.id}</div>
                                   <div className="text-[10px] text-white/20 uppercase tracking-widest mt-1">{m.desc}</div>
                                 </div>
                                 {formData.paymentMethod === m.id && (
@@ -558,7 +551,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                           {/* Payment Specific Content */}
                           <AnimatePresence mode="wait">
                             {formData.paymentMethod === 'PayPal' && (
-                              <motion.div 
+                              <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
@@ -569,7 +562,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                     <span className="text-[8px] text-white/20 uppercase tracking-widest block">PayPal Client ID</span>
                                     <span className="text-sm font-mono tracking-tighter truncate block max-w-[220px]">{settings?.paypal_client_id || '—'}</span>
                                   </div>
-                                  <button 
+                                  <button
                                     onClick={() => navigator.clipboard.writeText(settings?.paypal_client_id || '')}
                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors text-sensual-red"
                                   >
@@ -594,7 +587,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                             )}
 
                             {formData.paymentMethod === 'Bank Transfer' && (
-                              <motion.div 
+                              <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
@@ -613,7 +606,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                     <span className="text-[8px] text-white/20 uppercase tracking-widest block">Account Number</span>
                                     <span className="text-sm font-mono tracking-tighter">{settings?.account_number || '0000 0000 0000 0000'}</span>
                                   </div>
-                                  <button 
+                                  <button
                                     onClick={() => navigator.clipboard.writeText(settings?.account_number || '')}
                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors text-sensual-red"
                                   >
@@ -635,7 +628,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                             )}
 
                             {formData.paymentMethod === 'Bitcoin' && (
-                              <motion.div 
+                              <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
@@ -644,19 +637,19 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                                 <Bitcoin className="mx-auto text-sensual-red mb-4" size={40} />
                                 <h4 className="text-lg font-display mb-2">Crypto Payment</h4>
                                 <p className="text-[10px] text-white/40 leading-relaxed mb-6 uppercase tracking-widest">
-                                  Please send the total amount to the address below. 
+                                  Please send the total amount to the address below.
                                   Your booking will be confirmed after 2 confirmations.
                                 </p>
                                 <div className="p-4 bg-black/40 rounded-2xl border border-white/5 flex items-center justify-between mb-6">
                                   <span className="text-[10px] font-mono text-white/60 truncate mr-4">{settings?.bitcoin_address || 'bc1q...'}</span>
-                                  <button 
+                                  <button
                                     onClick={() => navigator.clipboard.writeText(settings?.bitcoin_address || '')}
                                     className="p-2 bg-sensual-red text-white rounded-lg"
                                   >
                                     <Copy size={14} />
                                   </button>
                                 </div>
-                                <button 
+                                <button
                                   onClick={() => window.open(`https://blockchair.com/bitcoin/address/${settings?.bitcoin_address || ''}`, '_blank')}
                                   className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-white/10 transition-all"
                                 >
@@ -677,7 +670,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               </motion.div>
                             )}
                           </AnimatePresence>
-                          
+
                           <p className="text-[10px] text-white/20 text-center uppercase tracking-widest mt-8">
                             Absolute confidentiality guaranteed &bull; Secure gateway
                           </p>
@@ -689,21 +682,21 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                   {/* Navigation Buttons */}
                   <div className="flex space-x-4 mt-12">
                     {step > 1 && (
-                      <button 
+                      <button
                         onClick={handleBack}
                         className="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
                       >
                         Back
                       </button>
                     )}
-                    <button 
-                        onClick={step === 4 ? () => handleConfirmBooking() : handleNext}
-                        disabled={isSubmitting || (step === 4 && !paymentConfirmed)}
-                        className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span>{isSubmitting ? 'Processing...' : (step === 4 ? 'Confirm Booking' : 'Continue')}</span>
-                        {!isSubmitting && <ChevronRight size={18} />}
-                      </button>
+                    <button
+                      onClick={step === 4 ? () => handleConfirmBooking() : handleNext}
+                      disabled={isSubmitting || (step === 4 && !paymentConfirmed)}
+                      className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span>{isSubmitting ? 'Processing...' : (step === 4 ? 'Confirm Booking' : 'Continue')}</span>
+                      {!isSubmitting && <ChevronRight size={18} />}
+                    </button>
                   </div>
                 </>
               )}

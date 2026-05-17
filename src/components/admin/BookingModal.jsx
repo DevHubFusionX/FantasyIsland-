@@ -92,7 +92,7 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
             <div className="space-y-6">
               <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-black/40 border border-white/5">
                 <div className="flex items-center space-x-2 md:space-x-3 mb-3 md:mb-4">
-                  <Fingerprint size={14} md:size={16} className="text-sensual-red" />
+                  <Fingerprint className="text-sensual-red w-3.5 h-3.5 md:w-4 md:h-4" />
                   <span className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-white/40">Reference ID</span>
                 </div>
                 <code className="text-[10px] md:text-xs text-white/60 block truncate font-mono">
@@ -102,7 +102,7 @@ const BookingModal = ({ isOpen, onClose, booking, onSave, isSaving }) => {
 
               <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-black/40 border border-white/5">
                 <div className="flex items-center space-x-2 md:space-x-3 mb-3 md:mb-4">
-                  <Hash size={14} md:size={16} className="text-sensual-red" />
+                  <Hash className="text-sensual-red w-3.5 h-3.5 md:w-4 md:h-4" />
                   <span className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-white/40">Status Logic</span>
                 </div>
                 <div className="space-y-2 md:space-y-3">
