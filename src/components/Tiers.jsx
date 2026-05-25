@@ -71,8 +71,10 @@ const Tiers = () => {
   const { data: tiers, isLoading } = useQuery({
     queryKey: ['tiers'],
     queryFn: async () => {
+      console.log('[Tiers] Fetching from:', API.tiers);
       const response = await fetch(API.tiers)
       const data = await response.json()
+      console.log('[Tiers] Response:', data);
       return data.data
     }
   })

@@ -70,8 +70,10 @@ const RoomsPage = () => {
   const { data: suitesData, isLoading, error } = useQuery({
     queryKey: ['suites'],
     queryFn: async () => {
+      console.log('[Suites] Fetching from:', API.suites);
       const response = await fetch(API.suites)
       const data = await response.json()
+      console.log('[Suites] Response:', data);
       return data.data
     }
   })
