@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://fantasy-island.onrender.com').replace(/\/$/, '');
 
 export const API = {
   auth: `${API_BASE_URL}/api/auth`,
