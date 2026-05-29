@@ -57,7 +57,7 @@ const AdminSettings = () => {
     {
       title: 'Bank Transfer Details',
       icon: Landmark,
-      keys: ['bank_name', 'account_name', 'account_number'],
+      keys: ['bank_name', 'beneficiary_name', 'account_number', 'routing_number'],
       description: 'These details will be displayed to guests during the Bank Transfer checkout flow.'
     },
     {

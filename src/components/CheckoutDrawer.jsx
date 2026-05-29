@@ -595,19 +595,31 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                               >
                                 <div className="flex justify-between items-center">
                                   <span className="text-[10px] text-white/40 uppercase tracking-widest">Bank Name</span>
-                                  <span className="text-sm font-bold">{settings?.bank_name || 'Obsidian Global Bank'}</span>
+                                  <span className="text-sm font-bold">{settings?.bank_name || '—'}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                  <span className="text-[10px] text-white/40 uppercase tracking-widest">Account Name</span>
-                                  <span className="text-sm font-bold">{settings?.account_name || 'Fantasy Island LTD'}</span>
+                                  <span className="text-[10px] text-white/40 uppercase tracking-widest">Beneficiary Name</span>
+                                  <span className="text-sm font-bold">{settings?.beneficiary_name || '—'}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
                                   <div>
                                     <span className="text-[8px] text-white/20 uppercase tracking-widest block">Account Number</span>
-                                    <span className="text-sm font-mono tracking-tighter">{settings?.account_number || '0000 0000 0000 0000'}</span>
+                                    <span className="text-sm font-mono tracking-tighter">{settings?.account_number || '—'}</span>
                                   </div>
                                   <button
                                     onClick={() => navigator.clipboard.writeText(settings?.account_number || '')}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-sensual-red"
+                                  >
+                                    <Copy size={16} />
+                                  </button>
+                                </div>
+                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                  <div>
+                                    <span className="text-[8px] text-white/20 uppercase tracking-widest block">Routing Number</span>
+                                    <span className="text-sm font-mono tracking-tighter">{settings?.routing_number || '—'}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => navigator.clipboard.writeText(settings?.routing_number || '')}
                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors text-sensual-red"
                                   >
                                     <Copy size={16} />
