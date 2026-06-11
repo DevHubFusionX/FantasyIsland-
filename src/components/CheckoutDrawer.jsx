@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
-import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Download, Maximize2, AlertCircle } from 'lucide-react'
+import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Maximize2, AlertCircle } from 'lucide-react'
 import { API, formatImageUrl } from '../config/api'
 import logoLady from '../assets/logo-lady.png'
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
 
 const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
-  const receiptRef = useRef(null)
   const [activeImg, setActiveImg] = useState(0)
   const [step, setStep] = useState(1) // 1: Info, 2: Personal, 3: Stay, 4: Payment, 5: Success
   const [bookingResult, setBookingResult] = useState(null)
@@ -22,13 +19,14 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     paymentMethod: 'Bank Transfer'
   })
 
-  // Reset step when drawer closes
+  // Reset all state when drawer closes
   useEffect(() => {
     if (!isOpen) {
       setStep(1)
       setBookingResult(null)
       setActiveImg(0)
       setPaymentConfirmed(false)
+      setFormData({ name: '', email: '', phone: '', date: '', duration: '3', paymentMethod: 'Bank Transfer' })
     }
   }, [isOpen])
 
@@ -127,7 +125,6 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   const isSubmitting = bookingMutation.isPending
 
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [slideDirection, setSlideDirection] = useState(0) // -1 left, 1 right
 
@@ -163,32 +160,6 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
     enter: (dir) => ({ x: dir > 0 ? 200 : -200, opacity: 0 }),
     center: { x: 0, opacity: 1 },
     exit: (dir) => ({ x: dir > 0 ? -200 : 200, opacity: 0 })
-  }
-
-  const handleDownloadReceipt = async () => {
-    if (!receiptRef.current) return
-    setIsDownloading(true)
-    try {
-      const canvas = await html2canvas(receiptRef.current, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true
-      })
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [canvas.width / 2, canvas.height / 2]
-      })
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2)
-      pdf.save(`FantasyIsland-Receipt-${bookingResult?._id || 'booking'}.pdf`)
-    } catch (err) {
-      console.error('PDF Generation Error:', err)
-      alert('Failed to generate PDF. Please try printing instead.')
-    } finally {
-      setIsDownloading(false)
-    }
   }
 
   const steps = [
@@ -706,7 +677,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
                       disabled={isSubmitting || (step === 4 && !paymentConfirmed)}
                       className="flex-[2] py-4 rounded-2xl bg-sensual-red text-white font-bold uppercase tracking-widest flex items-center justify-center space-x-2 red-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span>{isSubmitting ? 'Processing...' : (step === 4 ? 'Confirm Booking' : 'Continue')}</span>
+                      <span>{isSubmitting ? 'Sending...' : (step === 4 ? 'I Have Paid — Confirm' : 'Continue')}</span>
                       {!isSubmitting && <ChevronRight size={18} />}
                     </button>
                   </div>
