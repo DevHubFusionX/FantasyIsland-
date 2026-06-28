@@ -1,0 +1,71 @@
+[
+  {
+    "_id": "69f673a4b98d9cfb04e010d2",
+    "title": "The Velvet Regular Lounge",
+    "price": 580,
+    "img": "https://res.cloudinary.com/degktbk01/image/upload/v1778016317/fantasy-island/suites/o0bvtfjpvejrasaisadi.png",
+    "icon": "Shield",
+    "features": [
+      "Four curated sessions",
+      "Private obsidian finishes",
+      "Complimentary signature drink",
+      "Soundproof sanctuary"
+    ],
+    "available": true,
+    "__v": 0,
+    "createdAt": "2026-05-02T21:59:01.004Z",
+    "updatedAt": "2026-05-17T12:27:43.154Z",
+    "maxDays": 3,
+    "gallery": [
+      "https://res.cloudinary.com/degktbk01/image/upload/v1778016328/fantasy-island/suites/eyixhjmdmhqpzoigzbg4.png",
+      "https://res.cloudinary.com/degktbk01/image/upload/v1778017406/fantasy-island/suites/nxoa6ioda4ew7eyl6uma.png"
+    ],
+    "durationType": "Day"
+  },
+  {
+    "_id": "69f673a5b98d9cfb04e010d4",
+    "title": "Royal Obsidian",
+    "price": 1500,
+    "img": "https://res.cloudinary.com/degktbk01/image/upload/v1778000054/fantasy-island/suites/jhzvtorhhfnokbgyv6tl.jpg",
+    "icon": "Flame",
+    "features": [
+      "Unlimited session access",
+      "24/7 Personal concierge",
+      "Full premium complimentary bar",
+      "The peak of luxury"
+    ],
+    "available": true,
+    "__v": 0,
+    "createdAt": "2026-05-02T21:59:01.006Z",
+    "updatedAt": "2026-05-05T16:54:15.394Z",
+    "gallery": [
+      "https://res.cloudinary.com/degktbk01/image/upload/v1778000054/fantasy-island/suites/crk1z3fhpyd4q0qnzu4k.jpg",
+      "https://res.cloudinary.com/degktbk01/image/upload/v1778000054/fantasy-island/suites/wogrouzxfxbtrpdaasvi.jpg"
+    ],
+    "maxDays": 7
+  },
+  {
+    "_id": "69f8da749b8cbae29c4e4e8c",
+    "title": "Members Luxy Class",
+    "price": 2000,
+    "img": "https://res.cloudinary.com/degktbk01/image/upload/v1778000434/fantasy-island/suites/j5gjntg5ap4zucjxxt6w.jpg",
+    "gallery": [
+      "https://res.cloudinary.com/degktbk01/image/upload/v1778000434/fantasy-island/suites/bexgeezzw9mpdx9m00oj.jpg",
+      "https://res.cloudinary.com/degktbk01/image/upload/v1778017881/fantasy-island/suites/wr7qgslwpqnpkqsgefm4.png"
+    ],
+    "icon": "Star",
+    "features": [
+      "Built-in equipment",
+      "Discreet Access",
+      "Specialized Bedding and Seating",
+      "Full Wi-fi access",
+      "Complementary Drinks",
+      "Membership card"
+    ],
+    "available": true,
+    "maxDays": 4,
+    "createdAt": "2026-05-04T17:42:12.896Z",
+    "updatedAt": "2026-05-05T21:51:23.400Z",
+    "__v": 0
+  }
+]

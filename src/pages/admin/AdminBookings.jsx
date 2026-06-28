@@ -4,7 +4,7 @@ import { Search, Loader2, Plus, Download, Edit3, Trash2 } from 'lucide-react'
 import BookingRow from '../../components/admin/BookingRow'
 import BookingModal from '../../components/admin/BookingModal'
 import { API } from '../../config/api'
-import apiClient from '../../config/apiClient'
+import { getBookings, createBooking, updateBooking, deleteBooking } from '../../services/firebaseService'
 import { toast } from 'react-hot-toast'
 
 const AdminBookings = () => {
@@ -16,15 +16,15 @@ const AdminBookings = () => {
   const { data: bookings, isLoading, error } = useQuery({
     queryKey: ['bookings'],
     queryFn: async () => {
-      const response = await apiClient.get(API.bookings)
-      return response.data.data
+      return await getBookings()
     }
   })
 
   const createMutation = useMutation({
     mutationFn: async (newBooking) => {
-      const response = await apiClient.post(API.bookings, newBooking)
-      return response.data
+      const res = await createBooking(newBooking)
+      if (!res.success) throw new Error('Create failed')
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
@@ -33,14 +33,15 @@ const AdminBookings = () => {
       toast.success('Reservation recorded successfully')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to record reservation')
+      toast.error(err.message || 'Failed to record reservation')
     }
   })
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }) => {
-      const response = await apiClient.patch(`${API.bookings}/${id}`, updates)
-      return response.data
+      const res = await updateBooking(id, updates)
+      if (!res.success) throw new Error('Update failed')
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
@@ -49,21 +50,22 @@ const AdminBookings = () => {
       toast.success('Reservation updated')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to update reservation')
+      toast.error(err.message || 'Failed to update reservation')
     }
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const response = await apiClient.delete(`${API.bookings}/${id}`)
-      return response.data
+      const res = await deleteBooking(id)
+      if (!res.success) throw new Error('Delete failed')
+      return res
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       toast.success('Reservation deleted')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to delete reservation')
+      toast.error(err.message || 'Failed to delete reservation')
     }
   })
 

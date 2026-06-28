@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { X, User, Mail, Phone, Calendar, Clock, CreditCard, ChevronRight, ChevronLeft, CheckCircle2, Landmark, Send, Bitcoin, Copy, ExternalLink, Maximize2, AlertCircle } from 'lucide-react'
 import { API, formatImageUrl } from '../config/api'
+import { getSettings, createBooking } from '../services/firebaseService'
 import logoLady from '../assets/logo-lady.png'
 
 const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
@@ -49,9 +50,8 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
   const { data: settingsData } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const res = await fetch(API.settings)
-      const data = await res.json()
-      return data.data
+      const res = await getSettings()
+      return res.data
     },
     enabled: isOpen
   })
@@ -72,14 +72,9 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
 
   const bookingMutation = useMutation({
     mutationFn: async (bookingData) => {
-      const response = await fetch(API.bookings, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData)
-      })
-      const data = await response.json()
-      if (!data.success) throw new Error(data.message)
-      return data.data
+      const res = await createBooking(bookingData)
+      if (!res.success) throw new Error('Failed to create booking')
+      return res.data
     },
     onSuccess: (data) => {
       setBookingResult(data)
@@ -103,6 +98,7 @@ const CheckoutDrawer = ({ isOpen, onClose, room, prefillData }) => {
       totalAmount: room.price,
       paymentMethod: formData.paymentMethod,
       paymentStatus: transactionId ? 'Completed' : 'Pending',
+      bookingStatus: 'Pending',
       ...(transactionId && { transactionId })
     }
     bookingMutation.mutate(bookingData)

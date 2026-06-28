@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2, Star, Shield, Flame, Loader2 } from 'lucide-re
 import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import { API, formatImageUrl } from '../config/api'
+import { getSuites } from '../services/firebaseService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import CheckoutDrawer from '../components/CheckoutDrawer'
@@ -30,7 +31,7 @@ const RoomCard = React.memo(({ title, price, img, features, icon: Icon, delay, o
     <div className="p-6 md:p-10">
       <div className="flex items-center space-x-2 md:space-x-3 mb-3 md:mb-4 text-sensual-red">
         <Icon size={16} md:size={20} />
-        <span className="uppercase tracking-[0.3em] text-[9px] md:text-xs font-bold">Exclusive Suite</span>
+        <span className="uppercase tracking-[0.3em] text-[9px] md:text-[10px] font-bold">Exclusive Suite</span>
       </div>
       <h3 className="text-2xl md:text-4xl font-display mb-4 md:mb-6 text-white group-hover:text-sensual-red transition-colors">{title}</h3>
       
@@ -70,11 +71,8 @@ const RoomsPage = () => {
   const { data: suitesData, isLoading, error } = useQuery({
     queryKey: ['suites'],
     queryFn: async () => {
-      console.log('[Suites] Fetching from:', API.suites);
-      const response = await fetch(API.suites)
-      const data = await response.json()
-      console.log('[Suites] Response:', data);
-      return data.data
+      console.log('[Suites] Fetching from Firestore...');
+      return await getSuites();
     }
   })
 

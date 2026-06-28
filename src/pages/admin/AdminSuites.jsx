@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, Loader2, Plus, Edit3, Trash2, Home, DollarSign, Star, Shield, Flame, MoreVertical } from 'lucide-react'
 import SuiteModal from '../../components/admin/SuiteModal'
 import { API } from '../../config/api'
-import apiClient from '../../config/apiClient'
+import { getSuites, createSuite, updateSuite, deleteSuite } from '../../services/firebaseService'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 
@@ -18,15 +18,15 @@ const AdminSuites = () => {
   const { data: suites, isLoading, error } = useQuery({
     queryKey: ['suites'],
     queryFn: async () => {
-      const response = await apiClient.get(API.suites)
-      return response.data.data
+      return await getSuites()
     }
   })
 
   const createMutation = useMutation({
     mutationFn: async (newSuite) => {
-      const response = await apiClient.post(API.suites, newSuite)
-      return response.data
+      const res = await createSuite(newSuite)
+      if (!res.success) throw new Error('Create failed')
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suites'] })
@@ -35,14 +35,15 @@ const AdminSuites = () => {
       toast.success('Suite created successfully')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to create suite')
+      toast.error(err.message || 'Failed to create suite')
     }
   })
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }) => {
-      const response = await apiClient.patch(`${API.suites}/${id}`, updates)
-      return response.data
+      const res = await updateSuite(id, updates)
+      if (!res.success) throw new Error('Update failed')
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suites'] })
@@ -51,21 +52,22 @@ const AdminSuites = () => {
       toast.success('Suite updated successfully')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to update suite')
+      toast.error(err.message || 'Failed to update suite')
     }
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const response = await apiClient.delete(`${API.suites}/${id}`)
-      return response.data
+      const res = await deleteSuite(id)
+      if (!res.success) throw new Error('Delete failed')
+      return res
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suites'] })
       toast.success('Suite removed from inventory')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to delete suite')
+      toast.error(err.message || 'Failed to delete suite')
     }
   })
 
@@ -85,11 +87,31 @@ const AdminSuites = () => {
     setIsModalOpen(true)
   }
 
-  const handleSave = (id, data) => {
+  const handleSave = (id, formData) => {
+    const featuresStr = formData.get('features')
+    const features = featuresStr ? JSON.parse(featuresStr) : []
+
+    const existingGalleryStr = formData.get('existingGallery')
+    const existingGallery = existingGalleryStr ? JSON.parse(existingGalleryStr) : []
+
+    const img = formData.get('img')
+    const gallery = formData.getAll('gallery')
+
+    const plainData = {
+      title: formData.get('title'),
+      price: formData.get('price'),
+      icon: formData.get('icon'),
+      maxDays: formData.get('maxDays'),
+      features,
+      img,
+      gallery,
+      existingGallery
+    }
+
     if (id) {
-      updateMutation.mutate({ id, updates: data })
+      updateMutation.mutate({ id, updates: plainData })
     } else {
-      createMutation.mutate(data)
+      createMutation.mutate(plainData)
     }
   }
 

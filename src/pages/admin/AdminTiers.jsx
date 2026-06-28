@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, Loader2, Plus, Edit3, Trash2, Award, DollarSign, CheckCircle2 } from 'lucide-react'
 import TierModal from '../../components/admin/TierModal'
 import { API } from '../../config/api'
-import apiClient from '../../config/apiClient'
+import { getTiers, createTier, updateTier, deleteTier } from '../../services/firebaseService'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 
@@ -16,15 +16,16 @@ const AdminTiers = () => {
   const { data: tiers, isLoading } = useQuery({
     queryKey: ['tiers'],
     queryFn: async () => {
-      const response = await apiClient.get(API.tiers)
-      return response.data.data
+      const res = await getTiers()
+      return res.data
     }
   })
 
   const createMutation = useMutation({
     mutationFn: async (newTier) => {
-      const response = await apiClient.post(API.tiers, newTier)
-      return response.data
+      const res = await createTier(newTier)
+      if (!res.success) throw new Error('Create failed')
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tiers'] })
@@ -33,14 +34,15 @@ const AdminTiers = () => {
       toast.success('Tier created successfully')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to create tier')
+      toast.error(err.message || 'Failed to create tier')
     }
   })
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }) => {
-      const response = await apiClient.patch(`${API.tiers}/${id}`, updates)
-      return response.data
+      const res = await updateTier(id, updates)
+      if (!res.success) throw new Error('Update failed')
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tiers'] })
@@ -49,21 +51,22 @@ const AdminTiers = () => {
       toast.success('Tier updated successfully')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to update tier')
+      toast.error(err.message || 'Failed to update tier')
     }
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const response = await apiClient.delete(`${API.tiers}/${id}`)
-      return response.data
+      const res = await deleteTier(id)
+      if (!res.success) throw new Error('Delete failed')
+      return res
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tiers'] })
       toast.success('Tier deleted')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to delete tier')
+      toast.error(err.message || 'Failed to delete tier')
     }
   })
 

@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, User, Mail, Calendar, ChevronDown } from 'lucide-re
 import { useQuery } from '@tanstack/react-query'
 import { useLocation } from '../hooks/useLocation'
 import { API } from '../config/api'
+import { getSuites } from '../services/firebaseService'
 
 const Hero = () => {
   const { location } = useLocation()
@@ -20,9 +21,7 @@ const Hero = () => {
   const { data: suites = [] } = useQuery({
     queryKey: ['suites'],
     queryFn: async () => {
-      const res = await fetch(API.suites)
-      const data = await res.json()
-      return data.data || []
+      return await getSuites() || []
     }
   })
 

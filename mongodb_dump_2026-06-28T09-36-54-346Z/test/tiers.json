@@ -1,0 +1,59 @@
+[
+  {
+    "_id": "69fa67fe1dd367d688d32d78",
+    "title": "Regular",
+    "subtitle": "FANTASY",
+    "price": 580,
+    "period": "/ Reservation",
+    "features": [
+      "Four curated sessions",
+      "Elegantly designed private room",
+      "Complimentary signature drink",
+      "Club facility access",
+      "Standard etiquette policy"
+    ],
+    "badge": "Regular",
+    "order": 1,
+    "__v": 0,
+    "createdAt": "2026-05-05T21:58:22.087Z",
+    "updatedAt": "2026-05-15T19:27:03.468Z"
+  },
+  {
+    "_id": "69fa67fe1dd367d688d32d79",
+    "title": "VIP",
+    "subtitle": "Pure Indulgence",
+    "price": 1000,
+    "period": "/ Reservation",
+    "features": [
+      "Eight immersive sessions",
+      "Premium velvet private suite",
+      "Premium open bar (Selection)",
+      "Priority VIP entrance",
+      "Personalized mood lighting"
+    ],
+    "badge": "VIP",
+    "order": 2,
+    "__v": 0,
+    "createdAt": "2026-05-05T21:58:22.088Z",
+    "updatedAt": "2026-05-05T21:58:22.088Z"
+  },
+  {
+    "_id": "69fa67fe1dd367d688d32d7a",
+    "title": "Membership",
+    "subtitle": "Membership",
+    "price": 1500,
+    "period": "/ Reservation",
+    "features": [
+      "Unlimited sessions access",
+      "The Royal Obsidian Suite",
+      "Full premium complimentary bar",
+      "Personal lifestyle concierge",
+      "24/7 Priority booking"
+    ],
+    "badge": "Membership",
+    "order": 3,
+    "__v": 0,
+    "createdAt": "2026-05-05T21:58:22.088Z",
+    "updatedAt": "2026-05-05T21:58:22.088Z"
+  }
+]

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Save, Loader2, CreditCard, Landmark, Bitcoin, ShieldCheck, RefreshCw } from 'lucide-react'
 import { API } from '../../config/api'
-import apiClient from '../../config/apiClient'
+import { getSettings, updateSettings } from '../../services/firebaseService'
 import { toast } from 'react-hot-toast'
 
 const AdminSettings = () => {
@@ -12,8 +12,7 @@ const AdminSettings = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const response = await apiClient.get(API.settings)
-      return response.data
+      return await getSettings()
     }
   })
 
@@ -25,15 +24,16 @@ const AdminSettings = () => {
 
   const mutation = useMutation({
     mutationFn: async (updatedSettings) => {
-      const response = await apiClient.post(API.settings, { settings: updatedSettings })
-      return response.data
+      const res = await updateSettings(updatedSettings)
+      if (!res.success) throw new Error('Update failed')
+      return res
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
       toast.success('System configurations updated')
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to update settings')
+      toast.error(err.message || 'Failed to update settings')
     }
   })
 

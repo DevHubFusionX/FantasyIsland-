@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, CheckCircle2, XCircle, AlertCircle, Loader2, ArrowLeft, Calendar, Clock, CreditCard, Search } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { API } from '../config/api'
+import { getBookingsByEmail } from '../services/firebaseService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -113,10 +114,9 @@ const ManageBooking = () => {
   const { data: bookings, isLoading, error } = useQuery({
     queryKey: ['bookings-by-email', searchEmail],
     queryFn: async () => {
-      const res = await fetch(`${API.bookings}/by-email/${encodeURIComponent(searchEmail)}`)
-      const data = await res.json()
-      if (!data.success) throw new Error(data.message || 'No bookings found')
-      return data.data
+      const res = await getBookingsByEmail(searchEmail)
+      if (!res.success) throw new Error('No bookings found')
+      return res.data
     },
     enabled: !!searchEmail,
     retry: false

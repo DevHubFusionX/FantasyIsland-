@@ -4,14 +4,13 @@ import AdminStats from '../../components/admin/AdminStats'
 import { Loader2, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { API } from '../../config/api'
-import apiClient from '../../config/apiClient'
+import { getBookings } from '../../services/firebaseService'
 
 const AdminHome = () => {
   const { data: bookings, isLoading, error } = useQuery({
     queryKey: ['bookings'],
     queryFn: async () => {
-      const response = await apiClient.get(API.bookings)
-      return response.data.data
+      return await getBookings()
     },
     retry: 1
   })

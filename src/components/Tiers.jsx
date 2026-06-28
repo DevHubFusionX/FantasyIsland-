@@ -67,17 +67,18 @@ const TierCard = ({ title, price, features, delay, badge, subtitle, period }) =>
   </motion.div>
 )}
 
+import { getTiers } from '../services/firebaseService'
+
 const Tiers = () => {
-  const { data: tiers, isLoading } = useQuery({
+  const { data: tiersData, isLoading } = useQuery({
     queryKey: ['tiers'],
     queryFn: async () => {
-      console.log('[Tiers] Fetching from:', API.tiers);
-      const response = await fetch(API.tiers)
-      const data = await response.json()
-      console.log('[Tiers] Response:', data);
-      return data.data
+      console.log('[Tiers] Fetching from Firestore...');
+      const res = await getTiers()
+      return res.data
     }
   })
+  const tiers = tiersData || []
 
   return (
     <section id="tiers" className="py-32 px-6 md:px-12 bg-obsidian relative">

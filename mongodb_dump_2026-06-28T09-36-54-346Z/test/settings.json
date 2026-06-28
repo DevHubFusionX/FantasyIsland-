@@ -1,0 +1,70 @@
+[
+  {
+    "_id": "69f8d3e2eb91bb72000cc5fd",
+    "key": "bank_name",
+    "value": "Lead Bank",
+    "label": "Bank Name",
+    "category": "Bank Transfer",
+    "__v": 0,
+    "createdAt": "2026-05-04T17:14:10.798Z",
+    "updatedAt": "2026-06-02T18:53:13.245Z"
+  },
+  {
+    "_id": "69f8d3e2eb91bb72000cc5fe",
+    "key": "account_number",
+    "value": "218444905038",
+    "label": "Account Number",
+    "category": "Bank Transfer",
+    "__v": 0,
+    "createdAt": "2026-05-04T17:14:10.800Z",
+    "updatedAt": "2026-06-02T18:53:13.245Z"
+  },
+  {
+    "_id": "69f8d3e2eb91bb72000cc5ff",
+    "key": "account_name",
+    "value": "CHIDIEBERE EMMANUEL ONUOHA",
+    "label": "Account Name",
+    "category": "Bank Transfer",
+    "__v": 0,
+    "createdAt": "2026-05-04T17:14:10.800Z",
+    "updatedAt": "2026-06-02T18:53:13.245Z"
+  },
+  {
+    "_id": "69f8d3e2eb91bb72000cc600",
+    "key": "bitcoin_address",
+    "value": "13SUScxzsWixLanNpDLXb2jTxf3CAg9A3c",
+    "label": "Bitcoin Address",
+    "category": "Crypto",
+    "__v": 0,
+    "createdAt": "2026-05-04T17:14:10.800Z",
+    "updatedAt": "2026-06-02T18:53:13.245Z"
+  },
+  {
+    "_id": "69f8d3e2eb91bb72000cc601",
+    "key": "paypal_client_id",
+    "value": "Napo97@hotmail.de",
+    "label": "PayPal Client ID",
+    "category": "PayPal",
+    "__v": 0,
+    "createdAt": "2026-05-04T17:14:10.800Z",
+    "updatedAt": "2026-06-02T18:53:13.245Z"
+  },
+  {
+    "_id": "6a19aa1294531718d3506c1a",
+    "key": "beneficiary_name",
+    "__v": 0,
+    "category": "General",
+    "createdAt": "2026-05-29T15:00:33.410Z",
+    "updatedAt": "2026-06-02T18:53:13.245Z",
+    "value": "CHIDIEBERE EMMANUEL ONUOHA"
+  },
+  {
+    "_id": "6a19aa1294531718d3506c1b",
+    "key": "routing_number",
+    "__v": 0,
+    "category": "General",
+    "createdAt": "2026-05-29T15:00:33.410Z",
+    "updatedAt": "2026-06-02T18:53:13.245Z",
+    "value": "101019644"
+  }
+]

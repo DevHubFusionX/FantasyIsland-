@@ -4,12 +4,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast'
 import API_BASE_URL from './config/api'
 import LandingPage from './pages/LandingPage'
-import RoomsPage from './pages/RoomsPage'
-import ManageBooking from './pages/ManageBooking'
-import AdminLogin from './pages/AdminLogin'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import TawkChat from './components/TawkChat'
+
+// Lazy-load guest pages
+const RoomsPage = lazy(() => import('./pages/RoomsPage'))
+const ManageBooking = lazy(() => import('./pages/ManageBooking'))
+const AdminLogin = lazy(() => import('./pages/AdminLogin'))
 
 // Lazy-load admin routes — guests never download admin code
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -18,6 +20,13 @@ const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'))
 const AdminSuites = lazy(() => import('./pages/admin/AdminSuites'))
 const AdminTiers = lazy(() => import('./pages/admin/AdminTiers'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
+
+const PageFallback = () => (
+  <div className="min-h-screen bg-obsidian flex flex-col items-center justify-center">
+    <div className="w-8 h-8 border-2 border-sensual-red border-t-transparent rounded-full animate-spin mb-4" />
+    <p className="text-white/20 uppercase tracking-[0.3em] text-[10px] font-bold">Loading...</p>
+  </div>
+)
 
 const AdminFallback = () => (
   <div className="min-h-screen bg-obsidian flex flex-col items-center justify-center">
@@ -74,9 +83,15 @@ function App() {
 
             <Routes>
               <Route path="/" element={<LandingPage />} />
-              <Route path="/rooms" element={<RoomsPage />} />
-              <Route path="/manage-booking" element={<ManageBooking />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/rooms" element={
+                <Suspense fallback={<PageFallback />}><RoomsPage /></Suspense>
+              } />
+              <Route path="/manage-booking" element={
+                <Suspense fallback={<PageFallback />}><ManageBooking /></Suspense>
+              } />
+              <Route path="/admin/login" element={
+                <Suspense fallback={<PageFallback />}><AdminLogin /></Suspense>
+              } />
               
               {/* Protected Admin Routes */}
               <Route path="/admin" element={

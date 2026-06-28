@@ -1,0 +1,19 @@
+[
+  {
+    "_id": "6a257a411dcf73e5ff55d4a0",
+    "guestName": "victor gutu",
+    "email": "cristiangutu15@gmail.com",
+    "phone": "068286336",
+    "suiteTitle": "The Velvet Regular Lounge",
+    "suitePrice": 580,
+    "checkInDate": "2026-06-08T00:00:00.000Z",
+    "duration": 3,
+    "totalAmount": 580,
+    "paymentMethod": "Bank Transfer",
+    "paymentStatus": "Pending",
+    "bookingStatus": "Pending",
+    "createdAt": "2026-06-07T14:03:45.370Z",
+    "updatedAt": "2026-06-07T14:03:45.370Z",
+    "__v": 0
+  }
+]
