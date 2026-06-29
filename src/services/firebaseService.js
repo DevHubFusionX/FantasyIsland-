@@ -14,30 +14,34 @@ import {
 } from 'firebase/firestore';
 import { getDb } from '../config/firebase';
 
-// Helper to upload a file to Cloudinary and return its URL
+// Helper to convert a File to a base64 data URL
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+// Helper to upload a file via Vercel serverless function → Cloudinary
 export const uploadFile = async (file, path) => {
   if (!file) return null;
-  
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-  
-  if (!cloudName || !uploadPreset) {
-    throw new Error('Cloudinary config missing. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET in your environment.');
-  }
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', uploadPreset);
-  formData.append('folder', path); // e.g. "suites/main" or "suites/gallery"
+  const base64 = await fileToBase64(file);
 
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: 'POST', body: formData }
-  );
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      file: base64,
+      folder: path || 'fantasy-island/suites',
+    }),
+  });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || 'Image upload failed');
+    throw new Error(err.error || 'Image upload failed');
   }
 
   const data = await res.json();
