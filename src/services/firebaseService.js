@@ -12,16 +12,36 @@ import {
   orderBy,
   serverTimestamp 
 } from 'firebase/firestore';
-import { getDb, getStorage } from '../config/firebase';
+import { getDb } from '../config/firebase';
 
-// Helper to upload a file to Firebase Storage and return its URL
+// Helper to upload a file to Cloudinary and return its URL
 export const uploadFile = async (file, path) => {
   if (!file) return null;
-  const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-  const storage = await getStorage();
-  const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
-  const snapshot = await uploadBytes(storageRef, file);
-  return getDownloadURL(snapshot.ref);
+  
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  
+  if (!cloudName || !uploadPreset) {
+    throw new Error('Cloudinary config missing. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET in your environment.');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', uploadPreset);
+  formData.append('folder', path); // e.g. "suites/main" or "suites/gallery"
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    { method: 'POST', body: formData }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Image upload failed');
+  }
+
+  const data = await res.json();
+  return data.secure_url;
 };
 
 // --- SUITES SERVICE ---
