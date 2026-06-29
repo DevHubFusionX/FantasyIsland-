@@ -96,7 +96,7 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
 
   return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6">
+      <div className="fixed inset-0 z-[999] flex items-end md:items-center justify-center p-0 md:p-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -109,16 +109,16 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
           initial={{ opacity: 0, scale: 0.95, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 30 }}
-          className="relative w-full max-w-5xl bg-[#0D0202] border border-white/5 rounded-3xl md:rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col md:flex-row max-h-[90vh] overflow-hidden"
+          className="relative w-full max-w-5xl bg-[#0D0202] border border-white/5 rounded-t-3xl md:rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col md:flex-row h-[95vh] md:h-auto md:max-h-[90vh] overflow-hidden"
         >
           {/* Left Panel: Visuals & Preview */}
-          <div className="w-full md:w-[40%] bg-white/[0.02] border-b md:border-b-0 md:border-r border-white/5 p-5 md:p-8 flex flex-col shrink-0">
-            <div className="mb-4 md:mb-8">
+          <div className="w-full md:w-[40%] bg-white/[0.02] border-b md:border-b-0 md:border-r border-white/5 p-4 md:p-8 flex flex-col shrink-0 max-h-[35vh] md:max-h-none overflow-y-auto">
+            <div className="mb-3 md:mb-8">
               <span className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold text-sensual-red mb-1 md:mb-2 block">Live Preview</span>
-              <h4 className="text-xl md:text-3xl font-display font-bold text-white leading-tight">Refine <span className="text-white/20">Aesthetics</span></h4>
+              <h4 className="text-lg md:text-3xl font-display font-bold text-white leading-tight">Refine <span className="text-white/20">Aesthetics</span></h4>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-3 md:space-y-6">
               <div 
                 className="aspect-video rounded-2xl md:rounded-[2rem] bg-black/40 border border-white/5 overflow-hidden relative group cursor-pointer"
                 onClick={() => fileInputRef.current.click()}
@@ -137,8 +137,8 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
               </div>
 
               {/* Gallery Mini-Grid */}
-              <div className="mt-auto">
-                 <div className="flex justify-between items-center mb-4">
+              <div className="mt-2 md:mt-auto">
+                 <div className="flex justify-between items-center mb-2 md:mb-4">
                     <span className="text-[9px] uppercase tracking-widest font-bold text-white/30">Gallery ({galleryPreviews.length})</span>
                     <button onClick={() => galleryInputRef.current.click()} className="text-[9px] uppercase tracking-widest font-bold text-sensual-red hover:text-white transition-colors">Add More</button>
                  </div>
@@ -177,7 +177,7 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
           </div>
 
           {/* Right Panel: Data Entry */}
-          <div className="flex-1 p-6 md:p-12 md:max-h-[90vh] md:overflow-y-auto custom-scrollbar">
+          <div className="flex-1 p-5 md:p-12 overflow-y-auto custom-scrollbar min-h-0">
             <div className="flex justify-between items-start mb-8 md:mb-12">
               <div>
                 <h3 className="text-2xl md:text-4xl font-display font-bold text-white mb-1 md:mb-2">{isEdit ? 'Modify' : 'Initialize'} <span className="text-sensual-red">Suite</span></h3>
