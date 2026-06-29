@@ -111,8 +111,8 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
           exit={{ opacity: 0, scale: 0.95, y: 30 }}
           className="relative w-full max-w-5xl bg-[#0D0202] border border-white/5 rounded-t-3xl md:rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col md:flex-row h-[95vh] md:h-auto md:max-h-[90vh] overflow-hidden"
         >
-          {/* Left Panel: Visuals & Preview */}
-          <div className="w-full md:w-[40%] bg-white/[0.02] border-b md:border-b-0 md:border-r border-white/5 p-4 md:p-8 flex flex-col shrink-0 max-h-[35vh] md:max-h-none overflow-y-auto">
+          {/* Left Panel: Visuals & Preview (Desktop Only) */}
+          <div className="hidden md:flex w-full md:w-[40%] bg-white/[0.02] border-b md:border-b-0 md:border-r border-white/5 p-4 md:p-8 flex-col shrink-0 max-h-[35vh] md:max-h-none overflow-y-auto">
             <div className="mb-3 md:mb-8">
               <span className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold text-sensual-red mb-1 md:mb-2 block">Live Preview</span>
               <h4 className="text-lg md:text-3xl font-display font-bold text-white leading-tight">Refine <span className="text-white/20">Aesthetics</span></h4>
@@ -171,8 +171,6 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
                    )}
                  </div>
               </div>
-              <input type="file" ref={fileInputRef} hidden onChange={handleFileChange} accept="image/*" />
-              <input type="file" ref={galleryInputRef} multiple hidden onChange={handleGalleryChange} accept="image/*" />
             </div>
           </div>
 
@@ -314,16 +312,41 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
                 </div>
               ) : (
                 <div className="space-y-8">
-                  <div className="p-10 rounded-[2.5rem] bg-white/[0.02] border border-dashed border-white/10 flex flex-col items-center justify-center text-center group hover:border-sensual-red/30 transition-all cursor-pointer" onClick={() => galleryInputRef.current.click()}>
-                    <ImageIcon size={48} strokeWidth={1} className="text-white/10 mb-6 group-hover:text-sensual-red/40 transition-all group-hover:scale-110" />
-                    <p className="text-[11px] uppercase tracking-[0.4em] font-bold text-white/40 group-hover:text-white/80">Select Multiple Media Files</p>
-                    <p className="text-[8px] uppercase tracking-[0.2em] text-white/10 mt-3 font-light">Hold Ctrl/Cmd to pick more than one</p>
+                  {/* Principal Image (Mobile Only) */}
+                  <div className="md:hidden space-y-3">
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-white/30 px-1">Principal Image</span>
+                    <div 
+                      className="aspect-video rounded-2xl bg-black/40 border border-white/5 overflow-hidden relative group cursor-pointer"
+                      onClick={() => fileInputRef.current.click()}
+                    >
+                      {previewImg ? (
+                        <img src={previewImg} className="w-full h-full object-cover transition-transform duration-700" alt="Principal Preview" />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white/10">
+                          <Camera size={24} strokeWidth={1} className="mb-2" />
+                          <span className="text-[8px] uppercase tracking-widest font-bold">Upload Principal Image</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Camera size={20} className="text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Gallery Media */}
+                  <div className="space-y-3">
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-white/30 px-1">Gallery Media</span>
+                    <div className="p-8 md:p-10 rounded-[2.5rem] bg-white/[0.02] border border-dashed border-white/10 flex flex-col items-center justify-center text-center group hover:border-sensual-red/30 transition-all cursor-pointer" onClick={() => galleryInputRef.current.click()}>
+                      <ImageIcon size={40} strokeWidth={1} className="text-white/10 mb-4 group-hover:text-sensual-red/40 transition-all group-hover:scale-110" />
+                      <p className="text-[10px] md:text-[11px] uppercase tracking-[0.4em] font-bold text-white/40 group-hover:text-white/80">Select Multiple Media Files</p>
+                      <p className="text-[8px] uppercase tracking-[0.2em] text-white/10 mt-2 font-light">Hold Ctrl/Cmd to pick more than one</p>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {galleryPreviews.map((preview, idx) => (
                       <div key={idx} className="aspect-square rounded-2xl border border-white/5 overflow-hidden relative group">
-                        <img src={preview} className="w-full h-full object-cover" />
+                        <img src={preview} className="w-full h-full object-cover" alt={`Gallery Preview ${idx + 1}`} />
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button 
                             type="button"
@@ -366,6 +389,8 @@ const SuiteModal = ({ isOpen, onClose, suite, onSave, isSaving }) => {
                 </button>
               </div>
             </form>
+            <input type="file" ref={fileInputRef} hidden onChange={handleFileChange} accept="image/*" />
+            <input type="file" ref={galleryInputRef} multiple hidden onChange={handleGalleryChange} accept="image/*" />
           </div>
         </motion.div>
       </div>
